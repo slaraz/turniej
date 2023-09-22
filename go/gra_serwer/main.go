@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-
 	pb "github.com/slaraz/turniej/go/gra_proto"
 )
 
