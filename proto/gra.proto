@@ -1,0 +1,28 @@
+syntax = "proto3";
+option go_package = "github.com/slaraz/turniej/go/gra_proto";
+
+package gra_proto;
+
+service Gra {
+    // pierwsze wywołanie
+    // dobiera graczy, zaczyna rozgrywkę
+    rpc NowyMecz(WizytowkaGracza) returns (StanGry) {}
+
+    // ruch gracza klienta
+    rpc MojRuch(RuchGracza) returns (StanGry) {}
+}
+
+message WizytowkaGracza {
+    string nazwa = 1;
+}
+
+message StanGry {
+    string idGry = 1;
+    string sytuacjaNaPlanszy = 2;
+    string twojeKarty = 3;
+}
+
+message RuchGracza {
+    string idGry = 1;
+    string zagranaKarta = 2;
+}
