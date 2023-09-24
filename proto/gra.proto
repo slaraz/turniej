@@ -1,7 +1,7 @@
 syntax = "proto3";
-option go_package = "github.com/slaraz/turniej/go/gra_proto";
+option go_package = "github.com/slaraz/turniej/gra_go/proto";
 
-package gra_proto;
+package proto;
 
 service Gra {
     // pierwsze wywołanie

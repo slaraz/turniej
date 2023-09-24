@@ -1,4 +1,4 @@
-module github.com/slaraz/turniej/go/gra_proto
+module github.com/slaraz/turniej/gra_go
 
 go 1.21.1
 

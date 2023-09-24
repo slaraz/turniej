@@ -4,7 +4,7 @@
 // - protoc             v4.24.3
 // source: gra.proto
 
-package gra_proto
+package proto
 
 import (
 	context "context"
@@ -39,7 +39,7 @@ func NewGraClient(cc grpc.ClientConnInterface) GraClient {
 
 func (c *graClient) NowyMecz(ctx context.Context, in *WizytowkaGracza, opts ...grpc.CallOption) (*StanGry, error) {
 	out := new(StanGry)
-	err := c.cc.Invoke(ctx, "/gra_proto.Gra/NowyMecz", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Gra/NowyMecz", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (c *graClient) NowyMecz(ctx context.Context, in *WizytowkaGracza, opts ...g
 
 func (c *graClient) MojRuch(ctx context.Context, in *RuchGracza, opts ...grpc.CallOption) (*StanGry, error) {
 	out := new(StanGry)
-	err := c.cc.Invoke(ctx, "/gra_proto.Gra/MojRuch", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Gra/MojRuch", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func _Gra_NowyMecz_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gra_proto.Gra/NowyMecz",
+		FullMethod: "/proto.Gra/NowyMecz",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GraServer).NowyMecz(ctx, req.(*WizytowkaGracza))
@@ -118,7 +118,7 @@ func _Gra_MojRuch_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gra_proto.Gra/MojRuch",
+		FullMethod: "/proto.Gra/MojRuch",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GraServer).MojRuch(ctx, req.(*RuchGracza))
@@ -130,7 +130,7 @@ func _Gra_MojRuch_Handler(srv interface{}, ctx context.Context, dec func(interfa
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Gra_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "gra_proto.Gra",
+	ServiceName: "proto.Gra",
 	HandlerType: (*GraServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

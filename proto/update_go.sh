@@ -1,3 +1,3 @@
-protoc --go_out=../go/gra_proto --go_opt=paths=source_relative \
-    --go-grpc_out=../go/gra_proto --go-grpc_opt=paths=source_relative \
+protoc --go_out=../gra_go/proto --go_opt=paths=source_relative \
+    --go-grpc_out=../gra_go/proto --go-grpc_opt=paths=source_relative \
     gra.proto
