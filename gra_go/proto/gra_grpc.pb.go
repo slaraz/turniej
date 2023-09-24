@@ -23,8 +23,11 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GraClient interface {
 	// pierwsze wywołanie
-	// dobiera graczy, zaczyna rozgrywkę
+	// tworzy mecz
 	NowyMecz(ctx context.Context, in *WizytowkaGracza, opts ...grpc.CallOption) (*StanGry, error)
+	// pierwsze wywołanie
+	// dołącza do nowej gry
+	Dolacz(ctx context.Context, in *Dolaczanie, opts ...grpc.CallOption) (*StanGry, error)
 	// ruch gracza klienta
 	MojRuch(ctx context.Context, in *RuchGracza, opts ...grpc.CallOption) (*StanGry, error)
 }
@@ -46,6 +49,15 @@ func (c *graClient) NowyMecz(ctx context.Context, in *WizytowkaGracza, opts ...g
 	return out, nil
 }
 
+func (c *graClient) Dolacz(ctx context.Context, in *Dolaczanie, opts ...grpc.CallOption) (*StanGry, error) {
+	out := new(StanGry)
+	err := c.cc.Invoke(ctx, "/proto.Gra/Dolacz", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *graClient) MojRuch(ctx context.Context, in *RuchGracza, opts ...grpc.CallOption) (*StanGry, error) {
 	out := new(StanGry)
 	err := c.cc.Invoke(ctx, "/proto.Gra/MojRuch", in, out, opts...)
@@ -60,8 +72,11 @@ func (c *graClient) MojRuch(ctx context.Context, in *RuchGracza, opts ...grpc.Ca
 // for forward compatibility
 type GraServer interface {
 	// pierwsze wywołanie
-	// dobiera graczy, zaczyna rozgrywkę
+	// tworzy mecz
 	NowyMecz(context.Context, *WizytowkaGracza) (*StanGry, error)
+	// pierwsze wywołanie
+	// dołącza do nowej gry
+	Dolacz(context.Context, *Dolaczanie) (*StanGry, error)
 	// ruch gracza klienta
 	MojRuch(context.Context, *RuchGracza) (*StanGry, error)
 	mustEmbedUnimplementedGraServer()
@@ -73,6 +88,9 @@ type UnimplementedGraServer struct {
 
 func (UnimplementedGraServer) NowyMecz(context.Context, *WizytowkaGracza) (*StanGry, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NowyMecz not implemented")
+}
+func (UnimplementedGraServer) Dolacz(context.Context, *Dolaczanie) (*StanGry, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Dolacz not implemented")
 }
 func (UnimplementedGraServer) MojRuch(context.Context, *RuchGracza) (*StanGry, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MojRuch not implemented")
@@ -108,6 +126,24 @@ func _Gra_NowyMecz_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Gra_Dolacz_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Dolaczanie)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GraServer).Dolacz(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Gra/Dolacz",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GraServer).Dolacz(ctx, req.(*Dolaczanie))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Gra_MojRuch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RuchGracza)
 	if err := dec(in); err != nil {
@@ -136,6 +172,10 @@ var Gra_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "NowyMecz",
 			Handler:    _Gra_NowyMecz_Handler,
+		},
+		{
+			MethodName: "Dolacz",
+			Handler:    _Gra_Dolacz_Handler,
 		},
 		{
 			MethodName: "MojRuch",
