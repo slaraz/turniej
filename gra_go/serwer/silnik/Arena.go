@@ -14,6 +14,7 @@ const (
 
 type ArenaGry struct {
 	aktywneGry map[string]*gra
+	kanGetGra chan struct{string; chan struct{*gra; error} }
 }
 
 func NowaArena() *ArenaGry {
@@ -62,21 +63,12 @@ func (arena *ArenaGry) DodajGraczaDoGry(graId string, wizytowka *proto.Wizytowka
 	return graczId, nil
 }
 
-func (arena *ArenaGry) StanGry(graId, graczId string) (*proto.StanGry, error) {
-	gra, ok := arena.aktywneGry[graId]
-	if !ok {
-		return nil, fmt.Errorf("brak aktywnej gry %q", graId)
-	}
-	return gra.stanGry(graczId)
-}
-
 func (arena *ArenaGry) RuchGracza(ruch *proto.RuchGracza) error {
+	kanGra := make(chan struct{*gra; error})
 	arena.kanGetGra <- struct {ruch.GraId; kanGra}
 	gra, err := <-kanGra
-	gra := <-arena.kanGry
-//	gra, ok := arena.aktywneGry[ruch.GraId]
 	if err!= nil {
-		return fmt.Errorf("brak gry %q", ruch.GraId)
+		return fmt.Errorf("RuchGracza gra[%q]: %v", ruch.GraId, err)
 	}
 
 	gra.kanRuchGracza <- struct {ruch; kanOdp}
@@ -98,7 +90,7 @@ func (sil *ArenaGry) arenaFlow() {
 	case graId, kanGra := <- arena.kanGetGra:
 		gra, ok := arena.aktywneGry[graId] 
 		if !ok {
-			kanGra <- struct{ nil; fmt.Errorf("arena.aktywneGry: %q", graId)
+			kanGra <- struct{ nil; fmt.Errorf("brak gry arena.aktywneGry[%q]", graId)}
 			continue
 		}
 		kanGra <- struct{gra; nil}
