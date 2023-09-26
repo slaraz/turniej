@@ -2,6 +2,7 @@ package silnik
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/slaraz/turniej/gra_go/proto"
 )
@@ -19,6 +20,8 @@ func NowaArena() *ArenaGry {
 	arena := &ArenaGry{
 		aktywneGry: map[string]*gra{},
 	}
+	go arena.arenaFlow()
+
 	return arena
 }
 
@@ -35,7 +38,32 @@ func (sil *ArenaGry) NowaGra(iluGraczy int) (string, error) {
 	taGra := nowaGra(graId, iluGraczy)
 	sil.aktywneGry[graId] = taGra
 
+	go func() {
+		err := taGra.przebiegRozgrywki()
+		if err != nil {
+			log.Println("błąd przebiegRozgrywki:", err)
+		}
+		// TODO: współbierznie zrobić
+		delete(sil.aktywneGry, graId)
+	}()
+
 	return graId, nil
+}
+
+func (sil *ArenaGry) arenaFlow() {
+
+	nowaGra := nowaGra()
+	sil.aktywneGry[nowaGra.graId] = nowaGra
+	go nowaGra.Rozgrywka()
+
+	for {
+	select {
+	case graId <-nowaGra.Done:
+		delete(sil.aktywneGry, graId)
+	case msg <- 
+	}
+}
+
 }
 
 func (arena *ArenaGry) DodajGraczaDoGry(graId string, wizytowka *proto.WizytowkaGracza) (string, error) {
@@ -43,7 +71,7 @@ func (arena *ArenaGry) DodajGraczaDoGry(graId string, wizytowka *proto.Wizytowka
 	if !ok {
 		return "", fmt.Errorf("brak aktywnej gry %q", graId)
 	}
-	graczId, err := gra.dodajGracza(wizytowka)
+	graczId, err := gra.DodajGracza(wizytowka)
 	if err != nil {
 		return "", err
 	}

@@ -12,7 +12,7 @@ type gra struct {
 	graId        string
 	liczbaGraczy int
 	stolik       map[string]*gracz
-	kan          chan string
+	kanGracze    chan string
 }
 
 type gracz struct {
@@ -22,50 +22,84 @@ type gracz struct {
 
 func nowaGra(graId string, liczbaGraczy int) *gra {
 
-	ticker := time.NewTicker(time.Second)
-	kan := make(chan string)
-
-	// start
-	go func() {
-		// zbieranie graczy
-		for {
-			select {
-			case s := <-kan:
-				fmt.Println(s)
-			case t := <-ticker.C:
-				fmt.Println("tik", t)
-			}
-		}
-		// wykonywanie ruchów
-		for {
-			select {
-			case s := <-kan:
-				fmt.Println(s)
-			case t := <-ticker.C:
-				fmt.Println("tik", t)
-			}
-		}
-
-		// wynik zakończonej gry
-
-		// usuń grę z Areny
-
-		
-	}()
-
-	return &gra{
+	g := &gra{
 		graId:        graId,
 		liczbaGraczy: liczbaGraczy,
+		kanGracze:    make(chan struct{string, chan odpDodajGracza}),
 		stolik:       map[string]*gracz{},
-		kan:          kan,
 	}
+
+	return g
 }
 
-func (g *gra) dodajGracza(wizytowka *proto.WizytowkaGracza) (string, error) {
-	if g.liczbaGraczy == len(g.stolik) {
-		return "", fmt.Errorf("wszystkie miejsca zajęte, liczba miejsc: %d", len(g.stolik))
+func (g *gra) DodajGracza(wizytowka *proto.WizytowkaGracza) (string, error) {
+	kanOdp :=make(chan odpDodajGracza)
+
+	g.kanGracze <- reqDodajGracza{wizytowka.Nazwa, kanOdp}
+	odp := <- kanOdp
+
+	return odp.graczId, odp.err
+}
+
+func (g *gra) przebiegRozgrywki() err {
+
+	// zbieranie graczy
+	czasOut := time.After(time.Second*30)
+	for i:=1; i<= g.liczbaGraczy; i++ {
+
+		graczId := g.dodajGracza()
+
+		select {
+
+		case g.kanGracze <- graczId:
+			fmt.Println("dodałem gracza:", graczId)
+
+		case t := <-czasMinal:
+			fmt.Println("czasOut:", t)
+			return fmt.Errorf("Minął czas na zbieranie graczy.")
+		}
+	}
+	// wykonywanie ruchów
+	for {
+		select {
+		case s := <-kan:
+			fmt.Println(s)
+		case t := <-ticker.C:
+			fmt.Println("tik", t)
+		}
 	}
 
+	// wynik zakończonej gry
+
+	// usuń grę z Areny
+
+}
+
+type reqDodajGracza struct {
+	nazwaGracza string
+	kanOdp chan odpDodajGracza
+}
+
+type odpDodajGracza struct {
+	graczId string
+	err error
+}
+
+func (g* gra) getKrzeselko() (string)
+{
+	graczId := ""
+	for {
+		graczId = generujLosoweId(DLUGOSC_GRACZ_ID)
+		// czy jest takie id?
+		if _, ok := g.stolik[graczId]; !ok {
+			// nie ma, bierzemy
+			break
+		}
+	}
+	return graczId
+}
+
+func (g *gra) dodajGracza(wizytowka *proto.WizytowkaGracza) string {
 	graczId := ""
 	for {
 		graczId = generujLosoweId(DLUGOSC_GRACZ_ID)
@@ -80,7 +114,7 @@ func (g *gra) dodajGracza(wizytowka *proto.WizytowkaGracza) (string, error) {
 		wizytowka: wizytowka,
 	}
 	g.stolik[graczId] = nowyGracz
-	return graczId, nil
+	return graczId
 }
 
 func (g *gra) stanGry(graczId string) (*proto.StanGry, error) {
