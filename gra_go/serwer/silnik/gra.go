@@ -25,7 +25,9 @@ func nowaGra(graId string, liczbaGraczy int) *gra {
 	ticker := time.NewTicker(time.Second)
 	kan := make(chan string)
 
+	// start
 	go func() {
+		// zbieranie graczy
 		for {
 			select {
 			case s := <-kan:
@@ -34,6 +36,21 @@ func nowaGra(graId string, liczbaGraczy int) *gra {
 				fmt.Println("tik", t)
 			}
 		}
+		// wykonywanie ruchów
+		for {
+			select {
+			case s := <-kan:
+				fmt.Println(s)
+			case t := <-ticker.C:
+				fmt.Println("tik", t)
+			}
+		}
+
+		// wynik zakończonej gry
+
+		// usuń grę z Areny
+
+		
 	}()
 
 	return &gra{
