@@ -13,3 +13,21 @@ func generujLosoweId(dlugosc int) string {
 	}
 	return string(id)
 }
+
+const (
+	DLUGOSC_GRA_ID   = 3
+	DLUGOSC_GRACZ_ID = 10
+)
+
+func (sil *ArenaGry) getNowaGraID() string {
+	graId := ""
+	for {
+		graId = generujLosoweId(DLUGOSC_GRA_ID)
+		// czy jest takie id?
+		if _, ok := sil.aktywneGry[graId]; !ok {
+			// nie ma, bierzemy
+			return graId
+		}
+	}
+
+}

@@ -9,10 +9,9 @@ import (
 )
 
 type gra struct {
-	graId        string
 	liczbaGraczy int
 	stolik       map[string]*gracz
-	kanGracze    chan string
+	kanGracze    chan reqDodajGracza
 }
 
 type gracz struct {
@@ -23,21 +22,29 @@ type gracz struct {
 func nowaGra(graId string, liczbaGraczy int) *gra {
 
 	g := &gra{
-		graId:        graId,
 		liczbaGraczy: liczbaGraczy,
-		kanGracze:    make(chan struct{string, chan odpDodajGracza}),
 		stolik:       map[string]*gracz{},
 	}
+
+	go g.przebiegRozgrywki()
 
 	return g
 }
 
+type reqDodajGracza struct {
+	wizytowka *proto.WizytowkaGracza
+	kanOdp chan odpDodajGracza
+}
+
+type odpDodajGracza struct {
+	graczID string
+	err error
+}
+
 func (g *gra) DodajGracza(wizytowka *proto.WizytowkaGracza) (string, error) {
 	kanOdp :=make(chan odpDodajGracza)
-
-	g.kanGracze <- reqDodajGracza{wizytowka.Nazwa, kanOdp}
+	g.kanGracze <- reqDodajGracza{wizytowka, kanOdp}
 	odp := <- kanOdp
-
 	return odp.graczId, odp.err
 }
 
@@ -47,12 +54,15 @@ func (g *gra) przebiegRozgrywki() err {
 	czasOut := time.After(time.Second*30)
 	for i:=1; i<= g.liczbaGraczy; i++ {
 
-		graczId := g.dodajGracza()
 
 		select {
 
-		case g.kanGracze <- graczId:
+		case req := <- g.kanGracze:
+			graczId := g.dodajGracza()
+
 			fmt.Println("dodałem gracza:", graczId)
+
+			req.kanOdp <- odp
 
 		case t := <-czasMinal:
 			fmt.Println("czasOut:", t)

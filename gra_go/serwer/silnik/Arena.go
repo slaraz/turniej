@@ -2,104 +2,149 @@ package silnik
 
 import (
 	"fmt"
-	"log"
-
-	"github.com/slaraz/turniej/gra_go/proto"
-)
-
-const (
-	DLUGOSC_ID       = 3
-	DLUGOSC_GRACZ_ID = 10
 )
 
 type ArenaGry struct {
 	aktywneGry map[string]*gra
-	kanGetGra chan struct{string; chan struct{*gra; error} }
+	kanNewGra  chan reqNewGra
+	kanGetGra  chan reqGetGra
+	kanEndGra  chan reqEndGra
 }
 
 func NowaArena() *ArenaGry {
 	arena := &ArenaGry{
 		aktywneGry: map[string]*gra{},
+		kanNewGra:  make(chan reqNewGra),
+		kanGetGra:  make(chan reqGetGra),
+		kanEndGra:  make(chan reqEndGra),
 	}
 	go arena.arenaFlow()
 
 	return arena
 }
 
-func (sil *ArenaGry) NowaGra(iluGraczy int) (string, error) {
-	graId := ""
+type reqNewGra struct {
+	iluGraczy int
+	kanOdp    chan odpNowaGra
+}
+
+type odpNowaGra struct {
+	graId string
+	err   error
+}
+
+func (arena *ArenaGry) NowaGra(iluGraczy int) (string, error) {
+	kanOdp := make(chan odpNowaGra)
+	arena.kanNewGra <- reqNewGra{
+		iluGraczy: iluGraczy,
+		kanOdp:    kanOdp,
+	}
+	odp := <-kanOdp
+	return odp.graId, odp.err
+}
+
+type reqGetGra struct {
+	graID  string
+	kanOdp chan odpGetGra
+}
+
+type odpGetGra struct {
+	gra *gra
+	err error
+}
+
+func (arena *ArenaGry) GetGra(graID string) (*gra, error) {
+	kanOdp := make(chan odpGetGra)
+	arena.kanGetGra <- reqGetGra{
+		graID:  graID,
+		kanOdp: kanOdp,
+	}
+	odp := <-kanOdp
+	return odp.gra, odp.err
+}
+
+type reqEndGra struct {
+	graID  string
+	kanOdp chan odpEndGra
+}
+
+type odpEndGra struct {
+	err error
+}
+
+func (arena *ArenaGry) KoniecGry(graID string) error {
+	kanOdp := make(chan odpEndGra)
+	arena.kanEndGra <- reqEndGra{
+		graID:  graID,
+		kanOdp: kanOdp,
+	}
+	odp := <-kanOdp
+	return odp.err
+}
+
+func (arena *ArenaGry) arenaFlow() {
 	for {
-		graId = generujLosoweId(DLUGOSC_ID)
-		// czy jest takie id?
-		if _, ok := sil.aktywneGry[graId]; !ok {
-			// nie ma, bierzemy
-			break
+		select {
+
+		case req := <-arena.kanNewGra:
+			//TODO: zrobić ograniczenie liczby gier per serwer
+			graId := arena.getNowaGraID()
+			arena.aktywneGry[graId] = nowaGra(graId, req.iluGraczy)
+			req.kanOdp <- odpNowaGra{
+				graId: graId,
+			}
+
+		case req := <-arena.kanGetGra:
+			odp := odpGetGra{}
+			gra, ok := arena.aktywneGry[req.graID]
+			if !ok {
+				odp.err = fmt.Errorf("brak gry arena.aktywneGry[%q]", req.graID)
+			} else {
+				odp.gra = gra
+			}
+			req.kanOdp <- odp
+
+		case req := <-arena.kanEndGra:
+			delete(arena.aktywneGry, req.graID)
+			req.kanOdp <- odpEndGra{}
 		}
 	}
-	taGra := nowaGra(graId, iluGraczy)
-	sil.aktywneGry[graId] = taGra
-
-	go func() {
-		err := taGra.przebiegRozgrywki()
-		if err != nil {
-			log.Println("błąd przebiegRozgrywki:", err)
-		}
-		// TODO: współbierznie zrobić
-		delete(sil.aktywneGry, graId)
-	}()
-
-	return graId, nil
 }
 
-func (arena *ArenaGry) DodajGraczaDoGry(graId string, wizytowka *proto.WizytowkaGracza) (string, error) {
-	gra, ok := arena.aktywneGry[graId]
-	if !ok {
-		return "", fmt.Errorf("brak aktywnej gry %q", graId)
-	}
-	graczId, err := gra.DodajGracza(wizytowka)
-	if err != nil {
-		return "", err
-	}
-	return graczId, nil
-}
+// func (arena *ArenaGry) DodajGraczaDoGry(graId string, wizytowka *proto.WizytowkaGracza) (string, error) {
 
-func (arena *ArenaGry) RuchGracza(ruch *proto.RuchGracza) error {
-	kanGra := make(chan struct{*gra; error})
-	arena.kanGetGra <- struct {ruch.GraId; kanGra}
-	gra, err := <-kanGra
-	if err!= nil {
-		return fmt.Errorf("RuchGracza gra[%q]: %v", ruch.GraId, err)
-	}
+// 	gra, ok := arena.aktywneGry[graId]
+// 	if !ok {
+// 		return "", fmt.Errorf("brak aktywnej gry %q", graId)
+// 	}
+// 	graczId, err := gra.DodajGracza(wizytowka)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	return graczId, nil
+// }
 
-	gra.kanRuchGracza <- struct {ruch; kanOdp}
-	odp := <- kanOdp
-	if odp == koniecGry {
-		arena.kanKoniecGry <-ruch.GraId
-	}
-	return gra.ruchGracza(ruch)
-}
+// func (arena *ArenaGry) RuchGracza(ruch *proto.RuchGracza) error {
+// 	kanGra := make(chan struct {
+// 		*gra
+// 		error
+// 	})
+// 	arena.kanGetGra <- struct {
+// 		ruch.GraId
+// 		kanGra
+// 	}
+// 	gra, err := <-kanGra
+// 	if err != nil {
+// 		return fmt.Errorf("RuchGracza gra[%q]: %v", ruch.GraId, err)
+// 	}
 
-func (sil *ArenaGry) arenaFlow() {
-
-	nowaGra := nowaGra()
-	sil.aktywneGry[nowaGra.graId] = nowaGra
-	go nowaGra.Rozgrywka()
-
-	for {
-	select {
-	case graId, kanGra := <- arena.kanGetGra:
-		gra, ok := arena.aktywneGry[graId] 
-		if !ok {
-			kanGra <- struct{ nil; fmt.Errorf("brak gry arena.aktywneGry[%q]", graId)}
-			continue
-		}
-		kanGra <- struct{gra; nil}
-	case graId <- kanKoniecGry:
-		delete(sil.aktywneGry, graId)
-	}
-	}
-
-}
-}
-
-
+// 	gra.kanRuchGracza <- struct {
+// 		ruch
+// 		kanOdp
+// 	}
+// 	odp := <-kanOdp
+// 	if odp == koniecGry {
+// 		arena.kanKoniecGry <- ruch.GraId
+// 	}
+// 	return gra.ruchGracza(ruch)
+// }

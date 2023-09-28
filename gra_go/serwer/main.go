@@ -27,12 +27,18 @@ func (s *serwer) NowyMecz(ctx context.Context, wizytowka *proto.WizytowkaGracza)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	graczId, err := s.arena.DodajGraczaDoGry(graId, wizytowka)
+
+	gra, err := s.arena.GetGra(graId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	graczID, err := gra.DodajGracza(wizytowka)
 	if err != nil {
 		return nil, status.Error(codes.ResourceExhausted, err.Error())
 	}
 
-	stanGry, err := s.arena.StanGry(graId, graczId)
+	stanGry, err := gra.StanGry(graId, graczID)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -41,14 +47,17 @@ func (s *serwer) NowyMecz(ctx context.Context, wizytowka *proto.WizytowkaGracza)
 }
 
 func (s *serwer) Dolacz(ctx context.Context, dolacz *proto.Dolaczanie) (*proto.StanGry, error) {
-	graId := dolacz.GraId
-
-	graczId, err := s.arena.DodajGraczaDoGry(graId, dolacz.Wizytowka)
+	gra, err := s.arena.GetGra(dolacz.GraId)
 	if err != nil {
-		return nil, status.Error(codes.NotFound, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	stanGry, err := s.arena.StanGry(graId, graczId)
+	graczID, err := gra.DodajGracza(dolacz.Wizytowka)
+	if err != nil {
+		return nil, status.Error(codes.ResourceExhausted, err.Error())
+	}
+
+	stanGry, err := gra.StanGry(dolacz.GraId, graczID)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -56,13 +65,18 @@ func (s *serwer) Dolacz(ctx context.Context, dolacz *proto.Dolaczanie) (*proto.S
 	return stanGry, nil
 }
 
-func (s *serwer) MojRuch(ctx context.Context, in *proto.RuchGracza) (*proto.StanGry, error) {
-	err := s.arena.RuchGracza(in)
+func (s *serwer) MojRuch(ctx context.Context, ruch *proto.RuchGracza) (*proto.StanGry, error) {
+	gra, err := s.arena.GetGra(ruch.GraId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	stanGry, err := s.arena.StanGry(in.GraId, in.GraczId)
+	err := gra.RuchGracza(ruch)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	stanGry, err := s.arena.StanGry(ruch.GraId, ruch.GraczId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
