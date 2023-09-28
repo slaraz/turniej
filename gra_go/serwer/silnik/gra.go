@@ -43,16 +43,6 @@ func nowaGra(liczbaGraczy int) (*gra, error) {
 	return g, nil
 }
 
-type reqDodajGracza struct {
-	wizytowka *proto.WizytowkaGracza
-	kanOdp    chan odpDodajGracza
-}
-
-type odpDodajGracza struct {
-	graczID string
-	err     error
-}
-
 func (g *gra) WezGracza(wizytowka *proto.WizytowkaGracza) (string, error) {
 	graczID, ok := <-g.kanWezGracza
 	if !ok {
@@ -68,6 +58,16 @@ type reqRuch struct {
 
 type odpRuch struct {
 	err error
+}
+
+func (g *gra) WykonajRuch(graczID string, ruch string) error {
+	kanOdp := make(chan odpRuch)
+	g.gracze[graczID].kanRuch <- reqRuch{
+		ruch:   ruch,
+		kanOdp: kanOdp,
+	}
+	odp := <-kanOdp
+	return odp.err
 }
 
 func (g *gra) przebiegRozgrywki() {
@@ -106,38 +106,43 @@ func (g *gra) przebiegRozgrywki() {
 			select {
 			case req := <-gracz.kanRuch:
 				fmt.Println(req.ruch)
+
+				// TODO: tutaj podłączamy logikę?
+
 				req.kanOdp <- odpRuch{}
 			case <-timeout:
 				koniec(fmt.Errorf("upłynął czas dla gracza: %s", gracz.graczId))
 				return
+			case req <-kanStanGry:
+				odp := odpStanGry{}
+
+				// TODO: tutaj stan gry
+				odp.stan = "|__|_x_|"
+
+				req.kanOdp <- odp
 			}
 		}
 	}
 }
 
-func (g *gra) getKrzeselko() string {
-	graczId := ""
-	for {
-		graczId = generujLosoweId(DLUGOSC_GRACZ_ID)
-		// czy jest takie id?
-		if _, ok := g.stolik[graczId]; !ok {
-			// nie ma, bierzemy
-			break
-		}
-	}
-	return graczId
+type reqStanGry string {
+	kanOdp chan odpStanGry
 }
 
-// func (g *gra) stanGry(graczId string) (*proto.StanGry, error) {
-// 	stanGry := &proto.StanGry{
-// 		GraId:             g.graId,
-// 		GraczId:           graczId,
-// 		SytuacjaNaPlanszy: "|__|__|",
-// 		TwojeKarty:        "A1,Z7",
-// 	}
+type odpStanGry string {
+	stan string 
+	err error
+}
 
-// 	return stanGry, nil
-// }
+func (g *gra) StanGry(graczId string) (stan string, error) {
+	stanGry := &proto.StanGry{
+		GraczId:           graczId,
+		SytuacjaNaPlanszy: "|__|__|",
+		TwojeKarty:        "A1,Z7",
+	}
+
+	return stanGry, nil
+}
 
 // func (g *gra) ruchGracza(ruch *proto.RuchGracza) error {
 // 	gracz, ok := g.stolik[ruch.GraczId]
