@@ -31,3 +31,15 @@ func (sil *ArenaGry) getNowaGraID() string {
 	}
 
 }
+
+func (g *gra) getNowyGraczID() string {
+	graczId := ""
+	for {
+		graczId = generujLosoweId(DLUGOSC_GRACZ_ID)
+		// czy jest takie id?
+		if _, ok := g.stolik[graczId]; !ok {
+			// nie ma, bierzemy
+			break
+		}
+	}
+}
