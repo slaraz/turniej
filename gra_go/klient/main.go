@@ -11,12 +11,19 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-const IP_ADDR = "localhost:50051"
+const (
+	 IP_ADDR = "localhost:50051"
+	 NOWY_MECZ_TIMEOUT = time.Second * 5
+	 DOLACZ_DO_GRY_TIMEOUT = time.Second * 15
+	 RUCH_GRACZA_TIMEOUT = time.Second * 15
+)
+
 
 var (
 	addr  = flag.String("addr", IP_ADDR, "adres serwera gry")
-	join  = flag.String("join", "", "id gry, do której dołączyć")
-	nazwa = flag.String("nazwa", "Ziutek", "id gry, do której dołączyć")
+	nazwa = flag.String("nazwa", "Ziutek", "nazwa gracza")
+	nowa  = flag.Bool("nowa", false, "tworzy nową grę na serwerze")
+	graID = flag.String("gra", "", "dołącza do gry o podanym id")
 )
 
 func main() {
@@ -32,35 +39,37 @@ func main() {
 	defer conn.Close()
 	c := proto.NewGraClient(conn)
 
-	wizytowka := &proto.WizytowkaGracza{
-		Nazwa: *nazwa,
-	}
-
-	log.Println(*join)
-
-	stanGry := &proto.StanGry{}
-	if *join == "" {
-		log.Println("Tworzę nową grę...")
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	if *nowa {
+		ctx, cancel := context.WithTimeout(context.Background(), NOWY_MECZ_TIMEOUT)
 		defer cancel()
-		stanGry, err = c.NowyMecz(ctx, wizytowka)
+		nowaGraInfo, err := c.NowyMecz(ctx, &proto.KonfiguracjaGry{LiczbaGraczy: 2})
 		if err != nil {
 			log.Fatalf("c.NowyMecz: %v", err)
 		}
-	} else {
-		log.Printf("Dołączam do gry %q\n", *join)
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-		defer cancel()
-		dol := &proto.Dolaczanie{
-			GraId:     *join,
-			Wizytowka: wizytowka,
-		}
-		stanGry, err = c.Dolacz(ctx, dol)
-		if err != nil {
-			log.Fatalf("c.Dolacz: %v", err)
-		}
+		log.Printf("Nowa gra: %q\n", nowaGraInfo.GraID)
+		return
 	}
-	log.Printf("Gra: %q, gracz: %q", stanGry.GraId, stanGry.GraczId)
+
+	if *graID == "" {
+		flag.Usage()
+		return
+	}
+
+	log.Printf("Dołączam do gry %q\n", *graID)
+	ctx, cancel := context.WithTimeout(context.Background(), DOLACZ_DO_GRY_TIMEOUT)
+	defer cancel()
+	dol := &proto.Dolaczanie{
+		GraID:     *graID,
+		Wizytowka: &proto.WizytowkaGracza{
+			Nazwa: *nazwa,
+		},
+	}
+	stanGry, err := c.DolaczDoGry(ctx, dol)
+	if err != nil {
+		log.Fatalf("c.Dolacz: %v", err)
+	}
+
+	log.Printf("Gra: %q, gracz: %q", stanGry.GraID, stanGry.GraczID)
 
 	for {
 		err := ruch(c, stanGry)
@@ -71,12 +80,12 @@ func main() {
 }
 
 func ruch(c proto.GraClient, stanGry *proto.StanGry) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	ctx, cancel := context.WithTimeout(context.Background(), RUCH_GRACZA_TIMEOUT)
 	defer cancel()
 
 	rg := &proto.RuchGracza{
-		GraId:        stanGry.GraId,
-		GraczId:      stanGry.GraczId,
+		GraID:        stanGry.GraID,
+		GraczID:      stanGry.GraczID,
 		ZagranaKarta: "A5",
 	}
 	stanGry, err := c.MojRuch(ctx, rg)

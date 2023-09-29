@@ -26,7 +26,7 @@ type GraClient interface {
 	// zwraca ID gry
 	NowyMecz(ctx context.Context, in *KonfiguracjaGry, opts ...grpc.CallOption) (*NowaGraInfo, error)
 	// dołącza do nowej gry
-	Dolacz(ctx context.Context, in *Dolaczanie, opts ...grpc.CallOption) (*StanGry, error)
+	DolaczDoGry(ctx context.Context, in *Dolaczanie, opts ...grpc.CallOption) (*StanGry, error)
 	// ruch gracza klienta
 	MojRuch(ctx context.Context, in *RuchGracza, opts ...grpc.CallOption) (*StanGry, error)
 }
@@ -48,9 +48,9 @@ func (c *graClient) NowyMecz(ctx context.Context, in *KonfiguracjaGry, opts ...g
 	return out, nil
 }
 
-func (c *graClient) Dolacz(ctx context.Context, in *Dolaczanie, opts ...grpc.CallOption) (*StanGry, error) {
+func (c *graClient) DolaczDoGry(ctx context.Context, in *Dolaczanie, opts ...grpc.CallOption) (*StanGry, error) {
 	out := new(StanGry)
-	err := c.cc.Invoke(ctx, "/Gra/Dolacz", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Gra/DolaczDoGry", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ type GraServer interface {
 	// zwraca ID gry
 	NowyMecz(context.Context, *KonfiguracjaGry) (*NowaGraInfo, error)
 	// dołącza do nowej gry
-	Dolacz(context.Context, *Dolaczanie) (*StanGry, error)
+	DolaczDoGry(context.Context, *Dolaczanie) (*StanGry, error)
 	// ruch gracza klienta
 	MojRuch(context.Context, *RuchGracza) (*StanGry, error)
 	mustEmbedUnimplementedGraServer()
@@ -87,8 +87,8 @@ type UnimplementedGraServer struct {
 func (UnimplementedGraServer) NowyMecz(context.Context, *KonfiguracjaGry) (*NowaGraInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NowyMecz not implemented")
 }
-func (UnimplementedGraServer) Dolacz(context.Context, *Dolaczanie) (*StanGry, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Dolacz not implemented")
+func (UnimplementedGraServer) DolaczDoGry(context.Context, *Dolaczanie) (*StanGry, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DolaczDoGry not implemented")
 }
 func (UnimplementedGraServer) MojRuch(context.Context, *RuchGracza) (*StanGry, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MojRuch not implemented")
@@ -124,20 +124,20 @@ func _Gra_NowyMecz_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Gra_Dolacz_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Gra_DolaczDoGry_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Dolaczanie)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GraServer).Dolacz(ctx, in)
+		return srv.(GraServer).DolaczDoGry(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Gra/Dolacz",
+		FullMethod: "/Gra/DolaczDoGry",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GraServer).Dolacz(ctx, req.(*Dolaczanie))
+		return srv.(GraServer).DolaczDoGry(ctx, req.(*Dolaczanie))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -172,8 +172,8 @@ var Gra_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Gra_NowyMecz_Handler,
 		},
 		{
-			MethodName: "Dolacz",
-			Handler:    _Gra_Dolacz_Handler,
+			MethodName: "DolaczDoGry",
+			Handler:    _Gra_DolaczDoGry_Handler,
 		},
 		{
 			MethodName: "MojRuch",

@@ -3,11 +3,13 @@ module github.com/slaraz/turniej/gra_go
 go 1.21.1
 
 require (
+	git.r.pl/go/maplogger v1.2.5
 	google.golang.org/grpc v1.58.2
 	google.golang.org/protobuf v1.31.0
 )
 
 require (
+	github.com/elastic/go-elasticsearch/v7 v7.17.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect

@@ -89,7 +89,6 @@ func (arena *ArenaGry) arenaFlow() {
 		case req := <-arena.kanNewGra:
 			odp := odpNowaGra{}
 			//TODO: zrobić ograniczenie liczby gier per serwer
-			odp := odpNowaGra{}
 			// generuję unikalny ID gry
 			graID := arena.getNowaGraID()
 			// uruchamiam nową grę

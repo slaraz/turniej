@@ -7,7 +7,7 @@ service Gra {
     rpc NowyMecz(KonfiguracjaGry) returns (NowaGraInfo) {}
 
     // dołącza do nowej gry
-    rpc Dolacz(Dolaczanie) returns (StanGry) {}
+    rpc DolaczDoGry(Dolaczanie) returns (StanGry) {}
 
     // ruch gracza klienta
     rpc MojRuch(RuchGracza) returns (StanGry) {}
