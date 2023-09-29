@@ -87,12 +87,17 @@ func (arena *ArenaGry) arenaFlow() {
 		select {
 
 		case req := <-arena.kanNewGra:
+			odp := odpNowaGra{}
 			//TODO: zrobić ograniczenie liczby gier per serwer
-			graId := arena.getNowaGraID()
-			arena.aktywneGry[graId] = nowaGra(graId, req.iluGraczy)
-			req.kanOdp <- odpNowaGra{
-				graId: graId,
+			graID := arena.getNowaGraID()
+			gra, err := nowaGra(req.iluGraczy)
+			if err != nil {
+				odp.err = err
+			} else {
+				arena.aktywneGry[graID] = gra
+				odp.graId = graID
 			}
+			req.kanOdp <- odp
 
 		case req := <-arena.kanGetGra:
 			odp := odpGetGra{}
@@ -110,41 +115,3 @@ func (arena *ArenaGry) arenaFlow() {
 		}
 	}
 }
-
-// func (arena *ArenaGry) DodajGraczaDoGry(graId string, wizytowka *proto.WizytowkaGracza) (string, error) {
-
-// 	gra, ok := arena.aktywneGry[graId]
-// 	if !ok {
-// 		return "", fmt.Errorf("brak aktywnej gry %q", graId)
-// 	}
-// 	graczId, err := gra.DodajGracza(wizytowka)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	return graczId, nil
-// }
-
-// func (arena *ArenaGry) RuchGracza(ruch *proto.RuchGracza) error {
-// 	kanGra := make(chan struct {
-// 		*gra
-// 		error
-// 	})
-// 	arena.kanGetGra <- struct {
-// 		ruch.GraId
-// 		kanGra
-// 	}
-// 	gra, err := <-kanGra
-// 	if err != nil {
-// 		return fmt.Errorf("RuchGracza gra[%q]: %v", ruch.GraId, err)
-// 	}
-
-// 	gra.kanRuchGracza <- struct {
-// 		ruch
-// 		kanOdp
-// 	}
-// 	odp := <-kanOdp
-// 	if odp == koniecGry {
-// 		arena.kanKoniecGry <- ruch.GraId
-// 	}
-// 	return gra.ruchGracza(ruch)
-// }

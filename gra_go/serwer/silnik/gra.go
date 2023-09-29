@@ -14,6 +14,7 @@ type gra struct {
 	gracze       []*gracz
 	kanWezGracza chan string
 	kanDone      chan error
+	kanStanGry   chan reqStanGry
 }
 
 type gracz struct {
@@ -113,11 +114,12 @@ func (g *gra) przebiegRozgrywki() {
 			case <-timeout:
 				koniec(fmt.Errorf("upłynął czas dla gracza: %s", gracz.graczId))
 				return
-			case req <-kanStanGry:
+			case req := <- g.kanStanGry:
+
 				odp := odpStanGry{}
 
 				// TODO: tutaj stan gry
-				odp.stan = "|__|_x_|"
+				odp.stanGry = "|__|_x_|"
 
 				req.kanOdp <- odp
 			}
@@ -125,32 +127,22 @@ func (g *gra) przebiegRozgrywki() {
 	}
 }
 
-type reqStanGry string {
-	kanOdp chan odpStanGry
+type reqStanGry struct {
+	graczID string
+	kanOdp  chan odpStanGry
 }
 
-type odpStanGry string {
-	stan string 
-	err error
+type odpStanGry struct {
+	stanGry string
+	err     error
 }
 
-func (g *gra) StanGry(graczId string) (stan string, error) {
-	stanGry := &proto.StanGry{
-		GraczId:           graczId,
-		SytuacjaNaPlanszy: "|__|__|",
-		TwojeKarty:        "A1,Z7",
+func (g *gra) StanGry(graczID string) (string, error) {
+	kanOdp := make(chan odpStanGry)
+	g.kanStanGry <- reqStanGry{
+		graczID: graczID,
+		kanOdp:  kanOdp,
 	}
-
-	return stanGry, nil
+	odp := <-kanOdp
+	return odp.stanGry, nil
 }
-
-// func (g *gra) ruchGracza(ruch *proto.RuchGracza) error {
-// 	gracz, ok := g.stolik[ruch.GraczId]
-// 	if !ok {
-// 		return fmt.Errorf("brak gracza %q", ruch.GraczId)
-// 	}
-
-// 	time.Sleep(time.Second)
-// 	log.Printf("gracz %q zagrał karę %q\n", gracz.wizytowka.Nazwa, ruch.ZagranaKarta)
-// 	return nil
-// }

@@ -33,17 +33,23 @@ func (s *serwer) NowyMecz(ctx context.Context, wizytowka *proto.WizytowkaGracza)
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	graczID, err := gra.DodajGracza(wizytowka)
+	graczID, err := gra.WezGracza(wizytowka)
 	if err != nil {
 		return nil, status.Error(codes.ResourceExhausted, err.Error())
 	}
 
-	stanGry, err := gra.StanGry(graId, graczID)
+	stanGry, err := gra.StanGry(graczID)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return stanGry, nil
+	sg := &proto.StanGry{
+		GraId: graId,
+		GraczId: graczID,
+		SytuacjaNaPlanszy: stanGry,
+		TwojeKarty: "A5,T9",
+	}
+	return sg, nil
 }
 
 func (s *serwer) Dolacz(ctx context.Context, dolacz *proto.Dolaczanie) (*proto.StanGry, error) {
@@ -52,17 +58,23 @@ func (s *serwer) Dolacz(ctx context.Context, dolacz *proto.Dolaczanie) (*proto.S
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	graczID, err := gra.DodajGracza(dolacz.Wizytowka)
+	graczID, err := gra.WezGracza(dolacz.Wizytowka)
 	if err != nil {
 		return nil, status.Error(codes.ResourceExhausted, err.Error())
 	}
 
-	stanGry, err := gra.StanGry(dolacz.GraId, graczID)
+	stanGry, err := gra.StanGry(graczID)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return stanGry, nil
+	sg := &proto.StanGry{
+		GraId: dolacz.GraId,
+		GraczId: graczID,
+		SytuacjaNaPlanszy: stanGry,
+		TwojeKarty: "X7,H5",
+	}
+	return sg, nil
 }
 
 func (s *serwer) MojRuch(ctx context.Context, ruch *proto.RuchGracza) (*proto.StanGry, error) {
