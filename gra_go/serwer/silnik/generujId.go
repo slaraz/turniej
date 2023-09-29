@@ -15,31 +15,31 @@ func generujLosoweId(dlugosc int) string {
 }
 
 const (
-	DLUGOSC_GRA_ID   = 3
+	DLUGOSC_GRA_ID   = 4
 	DLUGOSC_GRACZ_ID = 10
 )
 
 func (sil *ArenaGry) getNowaGraID() string {
-	graId := ""
+	graID := ""
 	for {
-		graId = generujLosoweId(DLUGOSC_GRA_ID)
+		graID = generujLosoweId(DLUGOSC_GRA_ID)
 		// czy jest takie id?
-		if _, ok := sil.aktywneGry[graId]; !ok {
+		if _, ok := sil.aktywneGry[graID]; !ok {
 			// nie ma, bierzemy
-			return graId
+			return graID
 		}
 	}
 
 }
 
 func (g *gra) getNowyGraczID() string {
-	graczId := ""
+	graczID := ""
 	for {
-		graczId = generujLosoweId(DLUGOSC_GRACZ_ID)
+		graczID = generujLosoweId(DLUGOSC_GRACZ_ID)
 		// czy jest takie id?
-		if _, ok := g.stolik[graczId]; !ok {
+		if _, ok := g.stolik[graczID]; !ok {
 			// nie ma, bierzemy
-			break
+			return graczID
 		}
 	}
 }

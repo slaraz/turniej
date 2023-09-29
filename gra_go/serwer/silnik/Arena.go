@@ -5,18 +5,18 @@ import (
 )
 
 type ArenaGry struct {
-	aktywneGry map[string]*gra
-	kanNewGra  chan reqNewGra
-	kanGetGra  chan reqGetGra
-	kanEndGra  chan reqEndGra
+	aktywneGry   map[string]*gra
+	kanNewGra    chan reqNewGra
+	kanGetGra    chan reqGetGra
+	kanKoniecGry chan reqKoniecGry
 }
 
 func NowaArena() *ArenaGry {
 	arena := &ArenaGry{
-		aktywneGry: map[string]*gra{},
-		kanNewGra:  make(chan reqNewGra),
-		kanGetGra:  make(chan reqGetGra),
-		kanEndGra:  make(chan reqEndGra),
+		aktywneGry:   map[string]*gra{},
+		kanNewGra:    make(chan reqNewGra),
+		kanGetGra:    make(chan reqGetGra),
+		kanKoniecGry: make(chan reqKoniecGry),
 	}
 	go arena.arenaFlow()
 
@@ -29,7 +29,7 @@ type reqNewGra struct {
 }
 
 type odpNowaGra struct {
-	graId string
+	graID string
 	err   error
 }
 
@@ -40,7 +40,7 @@ func (arena *ArenaGry) NowaGra(iluGraczy int) (string, error) {
 		kanOdp:    kanOdp,
 	}
 	odp := <-kanOdp
-	return odp.graId, odp.err
+	return odp.graID, odp.err
 }
 
 type reqGetGra struct {
@@ -63,24 +63,24 @@ func (arena *ArenaGry) GetGra(graID string) (*gra, error) {
 	return odp.gra, odp.err
 }
 
-type reqEndGra struct {
-	graID  string
-	kanOdp chan odpEndGra
+type reqKoniecGry struct {
+	graID string
+	err   error
 }
 
 type odpEndGra struct {
 	err error
 }
 
-func (arena *ArenaGry) KoniecGry(graID string) error {
-	kanOdp := make(chan odpEndGra)
-	arena.kanEndGra <- reqEndGra{
-		graID:  graID,
-		kanOdp: kanOdp,
-	}
-	odp := <-kanOdp
-	return odp.err
-}
+// func (arena *ArenaGry) KoniecGry(graID string) error {
+// 	kanOdp := make(chan odpEndGra)
+// 	arena.kanEndGra <- reqKoniecGry{
+// 		graID:  graID,
+// 		kanOdp: kanOdp,
+// 	}
+// 	odp := <-kanOdp
+// 	return odp.err
+// }
 
 func (arena *ArenaGry) arenaFlow() {
 	for {
@@ -89,13 +89,17 @@ func (arena *ArenaGry) arenaFlow() {
 		case req := <-arena.kanNewGra:
 			odp := odpNowaGra{}
 			//TODO: zrobić ograniczenie liczby gier per serwer
+			odp := odpNowaGra{}
+			// generuję unikalny ID gry
 			graID := arena.getNowaGraID()
-			gra, err := nowaGra(req.iluGraczy)
+			// uruchamiam nową grę
+			gra, err := nowaGra(graID, req.iluGraczy, arena.kanKoniecGry)
 			if err != nil {
 				odp.err = err
 			} else {
+				// dokładam nową grę do aktywnych na arenie
 				arena.aktywneGry[graID] = gra
-				odp.graId = graID
+				odp.graID = graID
 			}
 			req.kanOdp <- odp
 
@@ -109,9 +113,9 @@ func (arena *ArenaGry) arenaFlow() {
 			}
 			req.kanOdp <- odp
 
-		case req := <-arena.kanEndGra:
+		case req := <-arena.kanKoniecGry:
+			fmt.Printf("koniec gry %q: %v\n", req.graID, req.err)
 			delete(arena.aktywneGry, req.graID)
-			req.kanOdp <- odpEndGra{}
 		}
 	}
 }

@@ -20,45 +20,27 @@ type serwer struct {
 	arena *silnik.ArenaGry
 }
 
-func (s *serwer) NowyMecz(ctx context.Context, wizytowka *proto.WizytowkaGracza) (*proto.StanGry, error) {
-	iluGraczy := 2
+func (s *serwer) NowyMecz(ctx context.Context, conf *proto.KonfiguracjaGry) (*proto.NowaGraInfo, error) {
 
-	graId, err := s.arena.NowaGra(iluGraczy)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	gra, err := s.arena.GetGra(graId)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	graczID, err := gra.WezGracza(wizytowka)
+	graID, err := s.arena.NowaGra(int(conf.LiczbaGraczy))
 	if err != nil {
 		return nil, status.Error(codes.ResourceExhausted, err.Error())
 	}
 
-	stanGry, err := gra.StanGry(graczID)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+	info := &proto.NowaGraInfo{
+		GraID: graID,
+		Opis:  fmt.Sprintf("nowa graID=%q dla %d graczy", graID, conf.LiczbaGraczy),
 	}
-
-	sg := &proto.StanGry{
-		GraId: graId,
-		GraczId: graczID,
-		SytuacjaNaPlanszy: stanGry,
-		TwojeKarty: "A5,T9",
-	}
-	return sg, nil
+	return info, nil
 }
 
-func (s *serwer) Dolacz(ctx context.Context, dolacz *proto.Dolaczanie) (*proto.StanGry, error) {
-	gra, err := s.arena.GetGra(dolacz.GraId)
+func (s *serwer) DolaczGracza(ctx context.Context, dolacz *proto.Dolaczanie) (*proto.StanGry, error) {
+	gra, err := s.arena.GetGra(dolacz.GraID)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
-	graczID, err := gra.WezGracza(dolacz.Wizytowka)
+	graczID, err := gra.DolaczGracza(dolacz.Wizytowka.Nazwa)
 	if err != nil {
 		return nil, status.Error(codes.ResourceExhausted, err.Error())
 	}
@@ -68,32 +50,38 @@ func (s *serwer) Dolacz(ctx context.Context, dolacz *proto.Dolaczanie) (*proto.S
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	sg := &proto.StanGry{
-		GraId: dolacz.GraId,
-		GraczId: graczID,
+	pstanGry := &proto.StanGry{
+		GraID:             dolacz.GraID,
 		SytuacjaNaPlanszy: stanGry,
-		TwojeKarty: "X7,H5",
+		TwojeKarty:        "A4,X8",
 	}
-	return sg, nil
+
+	return pstanGry, nil
 }
 
 func (s *serwer) MojRuch(ctx context.Context, ruch *proto.RuchGracza) (*proto.StanGry, error) {
-	gra, err := s.arena.GetGra(ruch.GraId)
+	gra, err := s.arena.GetGra(ruch.GraID)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	err := gra.RuchGracza(ruch)
+	err = gra.WykonajRuch(ruch.GraczID, ruch.ZagranaKarta)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	stanGry, err := gra.StanGry(ruch.GraczID)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	stanGry, err := s.arena.StanGry(ruch.GraId, ruch.GraczId)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+	pstanGry := &proto.StanGry{
+		GraID:             ruch.GraID,
+		SytuacjaNaPlanszy: stanGry,
+		TwojeKarty:        "A4,X8",
 	}
 
-	return stanGry, nil
+	return pstanGry, nil
 }
 
 func main() {

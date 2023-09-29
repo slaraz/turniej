@@ -22,10 +22,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GraClient interface {
-	// pierwsze wywołanie
 	// tworzy mecz
-	NowyMecz(ctx context.Context, in *WizytowkaGracza, opts ...grpc.CallOption) (*StanGry, error)
-	// pierwsze wywołanie
+	// zwraca ID gry
+	NowyMecz(ctx context.Context, in *KonfiguracjaGry, opts ...grpc.CallOption) (*NowaGraInfo, error)
 	// dołącza do nowej gry
 	Dolacz(ctx context.Context, in *Dolaczanie, opts ...grpc.CallOption) (*StanGry, error)
 	// ruch gracza klienta
@@ -40,9 +39,9 @@ func NewGraClient(cc grpc.ClientConnInterface) GraClient {
 	return &graClient{cc}
 }
 
-func (c *graClient) NowyMecz(ctx context.Context, in *WizytowkaGracza, opts ...grpc.CallOption) (*StanGry, error) {
-	out := new(StanGry)
-	err := c.cc.Invoke(ctx, "/proto.Gra/NowyMecz", in, out, opts...)
+func (c *graClient) NowyMecz(ctx context.Context, in *KonfiguracjaGry, opts ...grpc.CallOption) (*NowaGraInfo, error) {
+	out := new(NowaGraInfo)
+	err := c.cc.Invoke(ctx, "/Gra/NowyMecz", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +50,7 @@ func (c *graClient) NowyMecz(ctx context.Context, in *WizytowkaGracza, opts ...g
 
 func (c *graClient) Dolacz(ctx context.Context, in *Dolaczanie, opts ...grpc.CallOption) (*StanGry, error) {
 	out := new(StanGry)
-	err := c.cc.Invoke(ctx, "/proto.Gra/Dolacz", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Gra/Dolacz", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +59,7 @@ func (c *graClient) Dolacz(ctx context.Context, in *Dolaczanie, opts ...grpc.Cal
 
 func (c *graClient) MojRuch(ctx context.Context, in *RuchGracza, opts ...grpc.CallOption) (*StanGry, error) {
 	out := new(StanGry)
-	err := c.cc.Invoke(ctx, "/proto.Gra/MojRuch", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Gra/MojRuch", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -71,10 +70,9 @@ func (c *graClient) MojRuch(ctx context.Context, in *RuchGracza, opts ...grpc.Ca
 // All implementations must embed UnimplementedGraServer
 // for forward compatibility
 type GraServer interface {
-	// pierwsze wywołanie
 	// tworzy mecz
-	NowyMecz(context.Context, *WizytowkaGracza) (*StanGry, error)
-	// pierwsze wywołanie
+	// zwraca ID gry
+	NowyMecz(context.Context, *KonfiguracjaGry) (*NowaGraInfo, error)
 	// dołącza do nowej gry
 	Dolacz(context.Context, *Dolaczanie) (*StanGry, error)
 	// ruch gracza klienta
@@ -86,7 +84,7 @@ type GraServer interface {
 type UnimplementedGraServer struct {
 }
 
-func (UnimplementedGraServer) NowyMecz(context.Context, *WizytowkaGracza) (*StanGry, error) {
+func (UnimplementedGraServer) NowyMecz(context.Context, *KonfiguracjaGry) (*NowaGraInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NowyMecz not implemented")
 }
 func (UnimplementedGraServer) Dolacz(context.Context, *Dolaczanie) (*StanGry, error) {
@@ -109,7 +107,7 @@ func RegisterGraServer(s grpc.ServiceRegistrar, srv GraServer) {
 }
 
 func _Gra_NowyMecz_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(WizytowkaGracza)
+	in := new(KonfiguracjaGry)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -118,10 +116,10 @@ func _Gra_NowyMecz_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Gra/NowyMecz",
+		FullMethod: "/Gra/NowyMecz",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GraServer).NowyMecz(ctx, req.(*WizytowkaGracza))
+		return srv.(GraServer).NowyMecz(ctx, req.(*KonfiguracjaGry))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -136,7 +134,7 @@ func _Gra_Dolacz_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Gra/Dolacz",
+		FullMethod: "/Gra/Dolacz",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GraServer).Dolacz(ctx, req.(*Dolaczanie))
@@ -154,7 +152,7 @@ func _Gra_MojRuch_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Gra/MojRuch",
+		FullMethod: "/Gra/MojRuch",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GraServer).MojRuch(ctx, req.(*RuchGracza))
@@ -166,7 +164,7 @@ func _Gra_MojRuch_Handler(srv interface{}, ctx context.Context, dec func(interfa
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Gra_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.Gra",
+	ServiceName: "Gra",
 	HandlerType: (*GraServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
