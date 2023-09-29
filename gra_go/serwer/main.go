@@ -65,17 +65,23 @@ func (s *serwer) MojRuch(ctx context.Context, ruch *proto.RuchGracza) (*proto.St
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	err := gra.RuchGracza(ruch)
+	err = gra.WykonajRuch(ruch.GraczID, ruch.ZagranaKarta)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	stanGry, err := gra.StanGry(ruch.GraczID)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	stanGry, err := s.arena.StanGry(ruch.GraId, ruch.GraczId)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+	pstanGry := &proto.StanGry{
+		GraID:             ruch.GraID,
+		SytuacjaNaPlanszy: stanGry,
+		TwojeKarty:        "A4,X8",
 	}
 
-	return stanGry, nil
+	return pstanGry, nil
 }
 
 func main() {
