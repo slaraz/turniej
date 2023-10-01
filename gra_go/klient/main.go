@@ -12,12 +12,11 @@ import (
 )
 
 const (
-	 IP_ADDR = "localhost:50051"
-	 NOWY_MECZ_TIMEOUT = time.Second * 5
-	 DOLACZ_DO_GRY_TIMEOUT = time.Second * 15
-	 RUCH_GRACZA_TIMEOUT = time.Second * 15
+	IP_ADDR               = "localhost:50051"
+	NOWY_MECZ_TIMEOUT     = time.Second * 5
+	DOLACZ_DO_GRY_TIMEOUT = time.Second * 15
+	RUCH_GRACZA_TIMEOUT   = time.Second * 15
 )
-
 
 var (
 	addr  = flag.String("addr", IP_ADDR, "adres serwera gry")
@@ -47,7 +46,8 @@ func main() {
 			log.Fatalf("c.NowyMecz: %v", err)
 		}
 		log.Printf("Nowa gra: %q\n", nowaGraInfo.GraID)
-		return
+
+		*graID = nowaGraInfo.GraID
 	}
 
 	if *graID == "" {
@@ -59,7 +59,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), DOLACZ_DO_GRY_TIMEOUT)
 	defer cancel()
 	dol := &proto.Dolaczanie{
-		GraID:     *graID,
+		GraID: *graID,
 		Wizytowka: &proto.WizytowkaGracza{
 			Nazwa: *nazwa,
 		},

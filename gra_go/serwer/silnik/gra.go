@@ -2,6 +2,7 @@ package silnik
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"time"
 
@@ -11,8 +12,9 @@ import (
 const (
 	MIN_LICZBA_GRACZY         = 1
 	MAX_LICZBA_GRACZY         = 5
-	DOLACZANIE_GRACZY_TIMEOUT = time.Second * 30
-	RUCH_GRACZA_TIMEOUT       = time.Second * 10
+	DOLACZANIE_GRACZY_TIMEOUT = time.Second * 300
+	RUCH_GRACZA_TIMEOUT       = time.Second * 100
+	WYSLIJ_STATUS_TIMEOUT     = time.Second * 100
 )
 
 type gra struct {
@@ -90,8 +92,13 @@ type odpRuchGracza struct {
 }
 
 func (g *gra) WykonajRuch(graczID string, ruch string) error {
+	gracz, ok := g.stolik[graczID]
+	if !ok {
+		return fmt.Errorf("WykonajRuch: nie ma takiego gracza: %q", graczID)
+	}
 	kanOdp := make(chan odpRuchGracza)
-	g.stolik[graczID].kanRuch <- reqRuchGracza{
+	log.Printf("gra: %s, gracz %q: wykonuje ruchu %q\n", g.graID, graczID, ruch)
+	gracz.kanRuch <- reqRuchGracza{
 		ruch:   ruch,
 		kanOdp: kanOdp,
 	}
@@ -100,7 +107,11 @@ func (g *gra) WykonajRuch(graczID string, ruch string) error {
 }
 
 func (g *gra) StanGry(graczID string) (string, error) {
-	gracz := g.stolik[graczID]
+	gracz, ok := g.stolik[graczID]
+	if !ok {
+		return "", fmt.Errorf("StanGry: nie ma takiego gracza: %q", graczID)
+	}
+	log.Printf("gra: %s, gracz %q: rząda status\n", g.graID, gracz.nazwaGracza)
 	stan, ok := <-gracz.kanStatus
 	if !ok {
 		return "", fmt.Errorf("gracz status !ok")
@@ -109,16 +120,19 @@ func (g *gra) StanGry(graczID string) (string, error) {
 }
 
 func (g *gra) przebiegRozgrywki() {
+	log.Printf("gra %s: rozpoczęcie rozgrywki\n", g.graID)
 	// dołączanie graczy
 	timeout := time.After(DOLACZANIE_GRACZY_TIMEOUT)
 	for i := 1; i <= g.liczbaGraczy; i++ {
 		select {
 		case req := <-g.kanDolaczGracza:
+			log.Printf("gra %s: dolaczanie gracza: %s\n", g.graID, req.nazwaGracza)
 			graczID := g.getNowyGraczID()
 			nowyGracz := &gracz{
 				graczID:     graczID,
 				nazwaGracza: req.nazwaGracza,
 				kanRuch:     make(chan reqRuchGracza),
+				kanStatus:   make(chan string),
 			}
 			g.stolik[graczID] = nowyGracz
 			odp := odpDolaczGracza{
@@ -134,6 +148,7 @@ func (g *gra) przebiegRozgrywki() {
 	}
 
 	// kolejność graczy
+	log.Printf("gra %s: kolejność graczy\n", g.graID)
 	kolejnoscGraczy := []string{}
 	for graczID := range g.stolik {
 		kolejnoscGraczy = append(kolejnoscGraczy, graczID)
@@ -143,9 +158,23 @@ func (g *gra) przebiegRozgrywki() {
 
 	// wykonywanie ruchów
 	i := 0
+
+	// wyślij pierwszy status
+	ruszajacyGracz := g.stolik[kolejnoscGraczy[i]]
+	stan := g.logika.StanGry(i)
+	timeout2 := time.After(WYSLIJ_STATUS_TIMEOUT)
+	select {
+	case ruszajacyGracz.kanStatus <- stan:
+	case <-timeout2:
+		g.koniec(fmt.Errorf("upłynął czas dla gracza: %s", ruszajacyGracz.graczID))
+		return
+	}
+
 	for {
 
-		ruszajacyGracz := g.stolik[kolejnoscGraczy[i]]
+		ruszajacyGracz = g.stolik[kolejnoscGraczy[i]]
+
+		log.Printf("gra %s: ruszający gracz %q\n", g.graID, ruszajacyGracz.nazwaGracza)
 
 		timeout1 := time.After(RUCH_GRACZA_TIMEOUT)
 		select {
@@ -169,11 +198,11 @@ func (g *gra) przebiegRozgrywki() {
 
 		stan := g.logika.StanGry(i)
 
-		timeout2 := time.After(time.Second)
+		timeout2 := time.After(WYSLIJ_STATUS_TIMEOUT)
 		select {
 		case nastepnyGracz.kanStatus <- stan:
 		case <-timeout2:
-			g.koniec(fmt.Errorf("upłynął czas dla gracza: %s", ruszajacyGracz.graczID))
+			g.koniec(fmt.Errorf("upłynął czas dla gracza: %s", nastepnyGracz.graczID))
 			return
 		}
 	} //for
@@ -185,7 +214,6 @@ func (g *gra) koniec(err error) {
 	}
 	close(g.kanDolaczGracza)
 	g.kanKoniecGry <- err
-	return
 }
 
 func (g *gra) nastepny(i int) int {
