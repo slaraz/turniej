@@ -4,20 +4,20 @@ import (
 	"math/rand"
 )
 
-const dozwoloneZnaki = "abcdefghijklmnopqrstuvwxyz0123456789"
+// const dozwoloneZnaki = "abcdefghijklmnopqrstuvwxyz0123456789"
+const (
+	DLUGOSC_GRA_ID   = 2
+	DLUGOSC_GRACZ_ID = 10
+	DOZWOLONE_ZNAKI  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+)
 
 func generujLosoweId(dlugosc int) string {
 	id := make([]byte, dlugosc)
 	for i := range id {
-		id[i] = dozwoloneZnaki[rand.Intn(len(dozwoloneZnaki))]
+		id[i] = DOZWOLONE_ZNAKI[rand.Intn(len(DOZWOLONE_ZNAKI))]
 	}
 	return string(id)
 }
-
-const (
-	DLUGOSC_GRA_ID   = 4
-	DLUGOSC_GRACZ_ID = 10
-)
 
 func (sil *ArenaGry) getNowaGraID() string {
 	graID := ""

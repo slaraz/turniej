@@ -14,8 +14,8 @@ import (
 const (
 	IP_ADDR               = "localhost:50051"
 	NOWY_MECZ_TIMEOUT     = time.Second * 5
-	DOLACZ_DO_GRY_TIMEOUT = time.Second * 15
-	RUCH_GRACZA_TIMEOUT   = time.Second * 15
+	DOLACZ_DO_GRY_TIMEOUT = time.Second * 150
+	RUCH_GRACZA_TIMEOUT   = time.Second * 150
 )
 
 var (
@@ -69,7 +69,7 @@ func main() {
 		log.Fatalf("c.Dolacz: %v", err)
 	}
 
-	log.Printf("Gra: %q, gracz: %q", stanGry.GraID, stanGry.GraczID)
+	log.Printf("Stan gry: Gra: %q, gracz: %q", stanGry.GraID, stanGry.GraczID)
 
 	for {
 		err := ruch(c, stanGry)
@@ -88,11 +88,13 @@ func ruch(c proto.GraClient, stanGry *proto.StanGry) error {
 		GraczID:      stanGry.GraczID,
 		ZagranaKarta: "A5",
 	}
+
+	log.Printf("Wykonuję ruch: Gra: %q, gracz: %q", stanGry.GraID, stanGry.GraczID)
 	stanGry, err := c.MojRuch(ctx, rg)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("plansza: %q, karty: %q\n", stanGry.SytuacjaNaPlanszy, stanGry.TwojeKarty)
+	log.Printf("Stan gry: plansza: %q, karty: %q\n", stanGry.SytuacjaNaPlanszy, stanGry.TwojeKarty)
 	return nil
 }

@@ -66,6 +66,7 @@ func (s *serwer) DolaczDoGry(ctx context.Context, dolacz *proto.Dolaczanie) (*pr
 	}
 
 	pstanGry := &proto.StanGry{
+		GraczID:           graczID,
 		GraID:             dolacz.GraID,
 		SytuacjaNaPlanszy: stanGry,
 		TwojeKarty:        "A4,X8",
