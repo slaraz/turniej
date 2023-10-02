@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/slaraz/turniej/logika"
+	"github.com/slaraz/turniej/gra_go/logika"
 )
 
 const (
