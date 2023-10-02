@@ -68,20 +68,6 @@ type reqKoniecGry struct {
 	err   error
 }
 
-type odpEndGra struct {
-	err error
-}
-
-// func (arena *ArenaGry) KoniecGry(graID string) error {
-// 	kanOdp := make(chan odpEndGra)
-// 	arena.kanEndGra <- reqKoniecGry{
-// 		graID:  graID,
-// 		kanOdp: kanOdp,
-// 	}
-// 	odp := <-kanOdp
-// 	return odp.err
-// }
-
 func (arena *ArenaGry) arenaFlow() {
 	for {
 		select {

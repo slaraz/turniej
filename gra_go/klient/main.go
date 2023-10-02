@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"time"
 
@@ -45,7 +46,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("c.NowyMecz: %v", err)
 		}
-		log.Printf("Nowa gra: %q\n", nowaGraInfo.GraID)
+		log.Printf("Nowa gra %q\n", nowaGraInfo.GraID)
 
 		*graID = nowaGraInfo.GraID
 	}
@@ -69,24 +70,26 @@ func main() {
 		log.Fatalf("c.Dolacz: %v", err)
 	}
 
-	log.Printf("Stan gry: Gra: %q, gracz: %q", stanGry.GraID, stanGry.GraczID)
+	log.Printf("Stan gry: gra %q, gracz %q", stanGry.GraID, stanGry.GraczID)
 
+	nrRuchu := 1
 	for {
-		err := ruch(c, stanGry)
+		err := ruch(c, stanGry, nrRuchu)
 		if err != nil {
-			log.Fatalf("ruch: %v\n", err)
+			log.Fatalf("błąd ruch: %v\n", err)
 		}
+		nrRuchu++
 	}
 }
 
-func ruch(c proto.GraClient, stanGry *proto.StanGry) error {
+func ruch(c proto.GraClient, stanGry *proto.StanGry, nrRuchu int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), RUCH_GRACZA_TIMEOUT)
 	defer cancel()
 
 	rg := &proto.RuchGracza{
 		GraID:        stanGry.GraID,
 		GraczID:      stanGry.GraczID,
-		ZagranaKarta: "A5",
+		ZagranaKarta: fmt.Sprint("Karta", nrRuchu),
 	}
 
 	log.Printf("Wykonuję ruch: Gra: %q, gracz: %q", stanGry.GraID, stanGry.GraczID)

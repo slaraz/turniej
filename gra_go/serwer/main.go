@@ -26,10 +26,6 @@ type serwer struct {
 }
 
 func (s *serwer) NowyMecz(ctx context.Context, conf *proto.KonfiguracjaGry) (*proto.NowaGraInfo, error) {
-	// logowanie Elastic
-	mlog := s.logg.NowyWpis()
-	defer s.logg.Loguj(mlog)
-
 	graID, err := s.arena.NowaGra(int(conf.LiczbaGraczy))
 	if err != nil {
 		return nil, status.Error(codes.ResourceExhausted, err.Error())
@@ -43,11 +39,6 @@ func (s *serwer) NowyMecz(ctx context.Context, conf *proto.KonfiguracjaGry) (*pr
 }
 
 func (s *serwer) DolaczDoGry(ctx context.Context, dolacz *proto.Dolaczanie) (*proto.StanGry, error) {
-	// logowanie Elastic
-	mlog := s.logg.NowyWpis()
-	defer s.logg.Loguj(mlog)
-
-	log.Println(dolacz)
 	gra, err := s.arena.GetGra(dolacz.GraID)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -58,7 +49,7 @@ func (s *serwer) DolaczDoGry(ctx context.Context, dolacz *proto.Dolaczanie) (*pr
 		return nil, status.Error(codes.ResourceExhausted, err.Error())
 	}
 
-	log.Printf("gracz %q dołączył do gry %q", dolacz.Wizytowka.Nazwa, dolacz.GraID)
+	log.Printf("DolaczDoGry: gracz %q dołączył do gry %q", dolacz.Wizytowka.Nazwa, dolacz.GraID)
 
 	stanGry, err := gra.StanGry(graczID)
 	if err != nil {
@@ -76,10 +67,6 @@ func (s *serwer) DolaczDoGry(ctx context.Context, dolacz *proto.Dolaczanie) (*pr
 }
 
 func (s *serwer) MojRuch(ctx context.Context, ruch *proto.RuchGracza) (*proto.StanGry, error) {
-	// logowanie Elastic
-	mlog := s.logg.NowyWpis()
-	defer s.logg.Loguj(mlog)
-
 	gra, err := s.arena.GetGra(ruch.GraID)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("arena.GetGra: %v", err.Error()))

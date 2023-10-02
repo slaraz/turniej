@@ -1,14 +1,17 @@
 package logika
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+)
 
 type LogikaGry struct{}
 
 func (*LogikaGry) Ruch(nrGracza int, ruch string) error {
-	fmt.Printf("gracz nr %d zrobił ruch: %v", nrGracza, ruch)
+	log.Printf("LogikaGry: gracz nr %d zrobił ruch: %v\n", nrGracza, ruch)
 	return nil
 }
 
 func (*LogikaGry) StanGry(nrGracza int) string {
-	return fmt.Sprintf("stan gry dla gracza %d", nrGracza)
+	return fmt.Sprintf("stan gry dla gracza %d\n", nrGracza)
 }
