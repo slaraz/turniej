@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 
-	"git.r.pl/go/maplogger"
 	"github.com/slaraz/turniej/gra_go/proto"
 	"github.com/slaraz/turniej/gra_go/serwer/silnik"
 	"google.golang.org/grpc"
@@ -16,7 +15,6 @@ import (
 
 const (
 	IP_PORT = 50051
-	ELASTIC = maplogger.NA_KONSOLE
 )
 
 type serwer struct {
