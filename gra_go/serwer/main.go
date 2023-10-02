@@ -81,6 +81,7 @@ func (s *serwer) MojRuch(ctx context.Context, ruch *proto.RuchGracza) (*proto.St
 
 	pstanGry := &proto.StanGry{
 		GraID:             ruch.GraID,
+		GraczID:           ruch.GraczID,
 		SytuacjaNaPlanszy: stanGry,
 		TwojeKarty:        "A4,X8",
 	}

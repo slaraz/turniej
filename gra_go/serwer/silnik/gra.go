@@ -13,8 +13,8 @@ const (
 	MIN_LICZBA_GRACZY         = 1
 	MAX_LICZBA_GRACZY         = 5
 	DOLACZANIE_GRACZY_TIMEOUT = time.Second * 300
-	RUCH_GRACZA_TIMEOUT       = time.Second * 10
-	WYSLIJ_STATUS_TIMEOUT     = time.Second * 10
+	RUCH_GRACZA_TIMEOUT       = time.Second * 100
+	WYSLIJ_STATUS_TIMEOUT     = time.Second * 100
 )
 
 type gra struct {
@@ -115,6 +115,7 @@ func (g *gra) StanGry(graczID string) (string, error) {
 	}
 	log.Printf("StanGry: gra %s, gracz %q: rząda status\n", g.graID, gracz.nazwaGracza)
 	stan, ok := <-gracz.kanStatus
+	// TODO: albo kanał koniec gry
 	if !ok {
 		return "", fmt.Errorf("gracz status !ok")
 	}
