@@ -22,7 +22,6 @@ const (
 type serwer struct {
 	proto.UnimplementedGraServer
 	arena *silnik.ArenaGry
-	logg  *maplogger.MapLogger
 }
 
 func (s *serwer) NowyMecz(ctx context.Context, conf *proto.KonfiguracjaGry) (*proto.NowaGraInfo, error) {
@@ -95,9 +94,6 @@ func main() {
 	log.Println("Start")
 	defer log.Println("Koniec.")
 
-	logg := maplogger.NowyBulkLogger(ELASTIC)
-	defer logg.Close()
-
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", IP_PORT))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -105,7 +101,6 @@ func main() {
 	s := grpc.NewServer()
 	serwerGry := &serwer{
 		arena: silnik.NowaArena(),
-		logg:  logg,
 	}
 	proto.RegisterGraServer(s, serwerGry)
 	log.Printf("server listening at %v", lis.Addr())
