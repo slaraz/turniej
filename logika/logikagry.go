@@ -13,5 +13,5 @@ func (*LogikaGry) Ruch(nrGracza int, ruch string) error {
 }
 
 func (*LogikaGry) StanGry(nrGracza int) string {
-	return fmt.Sprintf("stan gry dla gracza %d\n", nrGracza)
+	return fmt.Sprintf("stan gry dla gracza %d", nrGracza)
 }
