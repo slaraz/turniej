@@ -18,15 +18,15 @@ func Test_checkIfExist(t *testing.T) {
 		{
 			name: "Card exist",
 			args: args{
-				in0: []Card{{Color: "red", Move: 1}, {Color: "blue", Move: 2}},
-				in1: Card{Color: "red", Move: 1},
+				in0: []Card{{color: "red", move: 1}, {color: "blue", move: 2}},
+				in1: Card{color: "red", move: 1},
 			},
 			want: true,
 		}, {
 			name: "Card doesn't exist",
 			args: args{
-				in0: []Card{{Color: "red", Move: 1}, {Color: "blue", Move: 2}},
-				in1: Card{Color: "green", Move: 1},
+				in0: []Card{{color: "red", move: 1}, {color: "blue", move: 2}},
+				in1: Card{color: "green", move: 1},
 			},
 			want: false,
 		}}
@@ -53,40 +53,40 @@ func Test_removeCard(t *testing.T) {
 		{
 			name: "card removed",
 			args: args{
-				cards: []Card{{Color: "red", Move: 1}, {Color: "blue", Move: 2}, {Color: "green", Move: 3}},
-				c:     Card{Color: "blue", Move: 2},
+				cards: []Card{{color: "red", move: 1}, {color: "blue", move: 2}, {color: "green", move: 3}},
+				c:     Card{color: "blue", move: 2},
 			},
-			want: []Card{{Color: "red", Move: 1}, {Color: "green", Move: 3}},
+			want: []Card{{color: "red", move: 1}, {color: "green", move: 3}},
 		},
 		{
 			name: "first removed",
 			args: args{
-				cards: []Card{{Color: "red", Move: 1}, {Color: "blue", Move: 2}, {Color: "green", Move: 3}},
-				c:     Card{Color: "red", Move: 1},
+				cards: []Card{{color: "red", move: 1}, {color: "blue", move: 2}, {color: "green", move: 3}},
+				c:     Card{color: "red", move: 1},
 			},
-			want: []Card{{Color: "blue", Move: 2}, {Color: "green", Move: 3}},
+			want: []Card{{color: "blue", move: 2}, {color: "green", move: 3}},
 		},
 		{
 			name: "last removed",
 			args: args{
-				cards: []Card{{Color: "red", Move: 1}, {Color: "blue", Move: 2}, {Color: "green", Move: 3}},
-				c:     Card{Color: "green", Move: 3},
+				cards: []Card{{color: "red", move: 1}, {color: "blue", move: 2}, {color: "green", move: 3}},
+				c:     Card{color: "green", move: 3},
 			},
-			want: []Card{{Color: "red", Move: 1}, {Color: "blue", Move: 2}},
+			want: []Card{{color: "red", move: 1}, {color: "blue", move: 2}},
 		},
 		{
 			name: "no removed",
 			args: args{
-				cards: []Card{{Color: "red", Move: 1}, {Color: "blue", Move: 2}, {Color: "green", Move: 3}},
-				c:     Card{Color: "purpuble", Move: 1},
+				cards: []Card{{color: "red", move: 1}, {color: "blue", move: 2}, {color: "green", move: 3}},
+				c:     Card{color: "purpuble", move: 1},
 			},
-			want: []Card{{Color: "red", Move: 1}, {Color: "blue", Move: 2}, {Color: "green", Move: 3}},
+			want: []Card{{color: "red", move: 1}, {color: "blue", move: 2}, {color: "green", move: 3}},
 		},
 		{
 			name: "last one removed",
 			args: args{
-				cards: []Card{{Color: "red", Move: 1}},
-				c:     Card{Color: "red", Move: 1},
+				cards: []Card{{color: "red", move: 1}},
+				c:     Card{color: "red", move: 1},
 			},
 			want: []Card{},
 		},

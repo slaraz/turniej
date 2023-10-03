@@ -3,7 +3,7 @@ package turtles
 var gameBoards = map[string][]Field{}
 
 type Field struct {
-	Pawns []Color
+	Pawns []Color `json:"pawns"`
 }
 
 func getCleanBoard() []Field {

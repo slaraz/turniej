@@ -7,7 +7,7 @@ type Player struct {
 
 func checkIfExist(cards []Card, card Card) bool {
 	for _, c := range cards {
-		if c.Color == card.Color && c.Move == card.Move {
+		if c.color == card.color && c.move == card.move {
 			return true
 		}
 	}
@@ -15,7 +15,7 @@ func checkIfExist(cards []Card, card Card) bool {
 }
 func removeCard(cards []Card, c Card) []Card {
 	for i, card := range cards {
-		if card.Color == c.Color && card.Move == c.Move {
+		if card.color == c.color && card.move == c.move {
 			return append(cards[:i], cards[i+1:]...)
 		}
 	}

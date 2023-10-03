@@ -15,11 +15,11 @@ var gameDecks = map[string][]Card{}
 type Type string
 
 type Card struct {
-	id    int
-	Color Color
-	Move  int
-	Type
-	Symbol Symbol
+	id     int
+	color  Color
+	move   int
+	typ    Type
+	Symbol Symbol `json:"symbol"`
 }
 
 func shuffleDefaultDeck() Deck {

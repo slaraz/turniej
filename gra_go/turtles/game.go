@@ -1,5 +1,9 @@
 package turtles
 
+import (
+	"log"
+)
+
 var maxCardForPlayer = 5
 
 type Game struct {
@@ -9,6 +13,8 @@ type Game struct {
 	players    []Player
 	round      int
 	playerTurn int
+	isEnd      bool
+	winer      int
 }
 
 func (game *Game) GetBoard() []Field {
@@ -16,17 +22,6 @@ func (game *Game) GetBoard() []Field {
 }
 func (game *Game) GetPlayerTurn() int {
 	return game.playerTurn + 1
-}
-func CreateNewGame(numberOfPlayers int) Game {
-	game := Game{
-		board:      CreateGameBoard("a"),
-		deck:       CreateGameDeck("a"),
-		players:    generatePlayers(numberOfPlayers),
-		round:      0,
-		playerTurn: 0,
-	}
-	game.dealTheCards()
-	return game
 }
 
 func generatePlayers(numberOfPlayers int) []Player {
@@ -45,7 +40,7 @@ func (game *Game) dealTheCards() {
 	}
 }
 
-func (game *Game) GetPlayerCards(playerNumber int) ([]Card, error) {
+func (game *Game) getPlayerCards(playerNumber int) ([]Card, error) {
 
 	if playerNumber > len(game.players) {
 		return nil, ErrInvalidPlayerNumber
@@ -57,24 +52,24 @@ func (game *Game) GetPlayerCards(playerNumber int) ([]Card, error) {
 	return game.players[playerNumber].Cards, nil
 }
 
-func (game *Game) PlayCard(c Card, color Color) (err error, winingPlayer int) {
+func (game *Game) playCard(c Card, color Color) (err error, winingPlayer int) {
 	player := game.players[game.playerTurn]
-	if err := game.CheckIfCardAndColorIsValid(c, color); err != nil {
+	if err := game.checkIfCardAndColorIsValid(c, color); err != nil {
 		return err, -1
 	}
-	if c.Type == LastOne && c.Color == Default && color == Default {
+	if c.typ == LastOne && c.color == Default && color == Default {
 		colors := findLastOnePawns(game.board)
 		if len(colors) != 1 {
 			return ErrPickTheColor, -1
 		}
-		c.Color = Colors[0]
+		c.color = Colors[0]
 	}
 	player.Cards = removeCard(player.Cards, c)
-	col := c.Color
-	if c.Color == Default {
+	col := c.color
+	if c.color == Default {
 		col = color
 	}
-	b, err := MovePawn(game.board, col, c.Move)
+	b, err := MovePawn(game.board, col, c.move)
 	if err != nil {
 		return err, -1
 	}
@@ -113,22 +108,48 @@ func findLastOnePawns([]Field) []Color {
 	}
 	return Colors
 }
-func (game *Game) CheckIfCardAndColorIsValid(card Card, color Color) error {
+func (game *Game) checkIfCardAndColorIsValid(card Card, color Color) error {
 	player := game.players[game.playerTurn]
 	if !checkIfExist(player.Cards, card) {
 		return ErrInvalidCard
 	}
-	if card.Type == Normal && card.Color == Default && color == Default {
+	if card.typ == Normal && card.color == Default && color == Default {
 		return ErrInvalidCard
 	}
 	colors := findLastOnePawns(game.board)
-	if card.Type == LastOne && card.Color != Default {
+	if card.typ == LastOne && card.color != Default {
 		for _, c := range colors {
-			if c == card.Color {
+			if c == card.color {
 				return nil
 			}
 		}
 		return ErrInvalidCard
 	}
 	return nil
+}
+func findCard(symbol Symbol) (Card, error) {
+	log.Println(symbol)
+	for _, card := range DefaultDeck {
+		if card.Symbol == symbol {
+			return card, nil
+		}
+	}
+	return Card{}, ErrInvalidCard
+}
+
+func getColor(text string) Color {
+	switch text {
+	case "red":
+		return Red
+	case "blue":
+		return Blue
+	case "green":
+		return Green
+	case "yellow":
+		return Yellow
+	case "purpule":
+		return Purpule
+	default:
+		return Default
+	}
 }
