@@ -40,6 +40,7 @@ func main() {
 	defer conn.Close()
 	c := proto.NewGraClient(conn)
 
+	conn.GetState()
 	// Jeśli podano opcję -nowa, to utwórz nową grę.
 	if *nowa {
 		ctx, cancel := context.WithTimeout(context.Background(), NOWY_MECZ_TIMEOUT)
@@ -64,6 +65,7 @@ func main() {
 	stanGry := dolaczDoGry(c, *graID, *nazwa)
 	fmt.Printf("Stan gry: plansza: %q, karty: %q\n", stanGry.SytuacjaNaPlanszy, stanGry.TwojeKarty)
 
+	// Przebieg gry.
 	for {
 
 		// Gracz podaje kartę na konsoli.
@@ -98,6 +100,7 @@ func dolaczDoGry(c proto.GraClient, graID, nazwa string) *proto.StanGry {
 	log.Printf("Gracz %s dołącza do gry %q", nazwa, graID)
 	ctx, cancel := context.WithTimeout(context.Background(), DOLACZ_DO_GRY_TIMEOUT)
 	defer cancel()
+	log.Println("Czekam na stan gry...")
 	stanGry, err := c.DolaczDoGry(ctx, &proto.Dolaczanie{
 		GraID: graID,
 		Wizytowka: &proto.WizytowkaGracza{
@@ -114,6 +117,8 @@ func wyslijRuch(c proto.GraClient, ruch *proto.RuchGracza) *proto.StanGry {
 	log.Printf("Gracz %s-%s zagrywa kartę: %v", ruch.GraID, ruch.GraczID, ruch.ZagranaKarta)
 	ctx, cancel := context.WithTimeout(context.Background(), RUCH_GRACZA_TIMEOUT)
 	defer cancel()
+	log.Println("Czekam na stan gry...")
+	
 	stanGry, err := c.MojRuch(ctx, ruch)
 	if err != nil {
 		log.Fatalf("c.MojRuch: %v", err)
