@@ -7,7 +7,7 @@ type Field struct {
 }
 
 func getCleanBoard() []Field {
-	return make([]Field, 9)
+	return make([]Field, 2)
 }
 
 func CreateGameBoard(uuid string) []Field {
@@ -23,9 +23,10 @@ func MovePawn(board []Field, pawn Color, move int) ([]Field, error) {
 	fieldNumber, pawnNumber := findPawn(pawn, board)
 
 	newIndex := fieldNumber + move
-	if newIndex < 0 || newIndex >= len(board) {
-		return nil, ErrInvalidMove
+	if newIndex >= len(board) {
+		newIndex = len(board) - 1
 	}
+
 	if fieldNumber == -1 || pawnNumber == -1 {
 		board[newIndex].Pawns = append(board[newIndex].Pawns, pawn)
 		return board, nil
@@ -33,7 +34,9 @@ func MovePawn(board []Field, pawn Color, move int) ([]Field, error) {
 	}
 	pawnsToSwap := board[fieldNumber].Pawns[pawnNumber:]
 	board[fieldNumber].Pawns = board[fieldNumber].Pawns[:pawnNumber]
-	board[newIndex].Pawns = append(board[newIndex].Pawns, pawnsToSwap...)
+	if newIndex >= 0 {
+		board[newIndex].Pawns = append(board[newIndex].Pawns, pawnsToSwap...)
+	}
 	return board, nil
 }
 func findPawn(pawn Color, board []Field) (fieldNumber int, pawnNumber int) {

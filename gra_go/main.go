@@ -13,10 +13,7 @@ import (
 )
 
 // TODO
-// 2. Fix moving backwords to the start
-// 3. Add wining condition when pawn is difrent then players color
-// 4. Decide what to do if the pawn jump over other the last field
-// 5. Create card shortcuts
+
 // 6. handle end game
 // 7. shuffle players colors
 // 8. case sensitive
@@ -49,7 +46,7 @@ func main() {
 
 		res, _ := game.GetGameStatus(game.GetPlayerTurn())
 		st := turtles.GameStatus{}
-		json.Unmarshal([]byte(res), st)
+		json.Unmarshal([]byte(res), &st)
 		isEnd = st.IsEnd
 		winer = st.Winer
 		log.Println(st)
@@ -72,7 +69,7 @@ func getCardFromText(text string) (turtles.Move, error) {
 	a := c[0]
 	color := getColor(c[1])
 	m := turtles.Move{CardSymbol: a, Color: string(color)}
-	log.Println(m)
+
 	return m, nil
 
 }

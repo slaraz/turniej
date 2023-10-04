@@ -77,11 +77,9 @@ func (game *Game) playCard(c Card, color Color) (err error, winingPlayer int) {
 
 	endGame, color := CheckIfGameOver(game.board)
 	if endGame {
-		for i, p := range game.players {
-			if p.Color == color {
-				return nil, i + 1
-			}
-		}
+		game.isEnd = true
+		_, pi := findWinner(game.board, game.players)
+		game.winer = pi
 	}
 	newCard, err := game.deck.GetCardFromDeck()
 	game.usedDeck = append(game.usedDeck, c)
@@ -152,4 +150,16 @@ func getColor(text string) Color {
 	default:
 		return Default
 	}
+}
+func findWinner(board []Field, players []Player) (Player, int) {
+	for i := len(board) - 1; i > -1; i-- {
+		for _, p := range board[i].Pawns {
+			for j, player := range players {
+				if player.Color == p {
+					return player, j + 1
+				}
+			}
+		}
+	}
+	return Player{}, -1
 }
