@@ -1,5 +1,9 @@
 package turtles
 
+const (
+	NUMBER_OF_FIELDS_ON_THE_BOARD = 2
+)
+
 var gameBoards = map[string][]Field{}
 
 type Field struct {
@@ -7,7 +11,7 @@ type Field struct {
 }
 
 func getCleanBoard() []Field {
-	return make([]Field, 2)
+	return make([]Field, NUMBER_OF_FIELDS_ON_THE_BOARD)
 }
 
 func CreateGameBoard(uuid string) []Field {
