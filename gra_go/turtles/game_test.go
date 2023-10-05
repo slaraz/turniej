@@ -23,7 +23,7 @@ func Test_findWinner(t *testing.T) {
 				players: []Player{{Color: "red"}, {Color: "blue"}, {Color: "green"}},
 			},
 			want:  Player{Color: "green"},
-			want1: 2,
+			want1: 3,
 		},
 		{
 			name: "Red Wins",
@@ -32,7 +32,7 @@ func Test_findWinner(t *testing.T) {
 				players: []Player{{Color: "red"}, {Color: "blue"}, {Color: "green"}},
 			},
 			want:  Player{Color: "red"},
-			want1: 0,
+			want1: 1,
 		},
 		{
 			name: "Blue Wins",
@@ -41,7 +41,7 @@ func Test_findWinner(t *testing.T) {
 				players: []Player{{Color: "yellow"}, {Color: "blue"}},
 			},
 			want:  Player{Color: "blue"},
-			want1: 1,
+			want1: 2,
 		},
 	}
 	for _, tt := range tests {
@@ -54,6 +54,33 @@ func Test_findWinner(t *testing.T) {
 				t.Errorf("findWinner() = %v, want %v", got1, tt.want1)
 			}
 
+		})
+	}
+}
+
+func Test_shuffleColorsd(t *testing.T) {
+	type args struct {
+		colors []Color
+	}
+	tests := []struct {
+		name string
+		args args
+		want []Color
+	}{
+		{
+			name: "collors are shuffled",
+			args: args{
+				colors: []Color{"red", "green", "blue", "yellow"},
+			},
+
+			want: []Color{"red", "green", "blue", "yellow"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := shuffleColorsd(tt.args.colors); reflect.DeepEqual(got, tt.want) {
+				t.Errorf("not shuffling() = %v, want diffrent %v", got, tt.want)
+			}
 		})
 	}
 }

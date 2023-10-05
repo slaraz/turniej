@@ -1,7 +1,8 @@
 package turtles
 
 import (
-	"log"
+	"math/rand"
+	"time"
 )
 
 var maxCardForPlayer = 5
@@ -26,8 +27,9 @@ func (game *Game) GetPlayerTurn() int {
 
 func generatePlayers(numberOfPlayers int) []Player {
 	players := make([]Player, numberOfPlayers)
+	colors := shuffleColorsd(Colors)
 	for i := 0; i < numberOfPlayers; i++ {
-		players[i] = Player{Color: Colors[i]} ///TODO shuffle the colors
+		players[i] = Player{Color: colors[i]} ///TODO shuffle the colors
 	}
 	return players
 }
@@ -126,7 +128,6 @@ func (game *Game) checkIfCardAndColorIsValid(card Card, color Color) error {
 	return nil
 }
 func findCard(symbol Symbol) (Card, error) {
-	log.Println(symbol)
 	for _, card := range DefaultDeck {
 		if card.Symbol == symbol {
 			return card, nil
@@ -162,4 +163,14 @@ func findWinner(board []Field, players []Player) (Player, int) {
 		}
 	}
 	return Player{}, -1
+}
+func shuffleColorsd(colors []Color) []Color {
+	rand := rand.New(rand.NewSource(time.Now().UnixNano()))
+	for i, _ := range colors {
+		r := i + (rand.Int() % (len(colors) - i))
+		c := colors[i]
+		colors[i] = colors[r]
+		colors[r] = c
+	}
+	return colors
 }

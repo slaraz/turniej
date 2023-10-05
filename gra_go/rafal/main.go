@@ -14,9 +14,6 @@ import (
 
 // TODO
 
-// 6. handle end game
-// 7. shuffle players colors
-// 8. case sensitive
 // 9. change number of fields
 // 10. server picks the player
 func main() {
@@ -51,7 +48,7 @@ func main() {
 		json.Unmarshal([]byte(res), &st)
 		isEnd = st.IsEnd
 		winer = st.Winer
-		log.Println(st)
+
 	}
 	log.Println("Winer is player: ", winer)
 
@@ -69,7 +66,7 @@ func getCardFromText(text string) (turtles.Move, error) {
 	}
 
 	a := c[0]
-	color := getColor(c[1])
+	color := getColor(strings.ToLower(c[1]))
 	m := turtles.Move{CardSymbol: a, Color: string(color)}
 
 	return m, nil

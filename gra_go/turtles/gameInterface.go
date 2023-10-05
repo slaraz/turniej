@@ -2,6 +2,7 @@ package turtles
 
 import (
 	"encoding/json"
+	"strings"
 )
 
 type Move struct {
@@ -34,10 +35,12 @@ func (game *Game) Move(moveStr string) error {
 	if err != nil {
 		return err
 	}
+	move.CardSymbol = strings.ToUpper(move.CardSymbol)
 	card, err := findCard(Symbol(move.CardSymbol))
 	if err != nil {
 		return err
 	}
+	move.Color = strings.ToLower(move.Color)
 	color := getColor(move.Color)
 	err, winer := game.playCard(card, color)
 	if winer > 0 {
