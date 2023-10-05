@@ -17,6 +17,8 @@ import (
 // 6. handle end game
 // 7. shuffle players colors
 // 8. case sensitive
+// 9. change number of fields
+// 10. server picks the player
 func main() {
 	log.Println("Hello World")
 
