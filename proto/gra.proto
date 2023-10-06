@@ -52,6 +52,7 @@ message RuchGracza {
     string graID = 1; 
     string graczID = 2;
     Karta zagranaKarta = 3;
+    KolorZolwia kolorWybrany = 4;
 }
 
 enum Karta {

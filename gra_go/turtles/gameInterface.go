@@ -1,6 +1,8 @@
 package turtles
 
 import (
+	"log"
+
 	"github.com/slaraz/turniej/gra_go/proto"
 )
 
@@ -28,7 +30,10 @@ func (game *Game) GetGameStatus(playerNumber int) (*proto.StanGry, error) {
 		Winer: game.winer,
 		IsEnd: game.isEnd,
 	}
-	return mapGameStatus(&status), nil
+	log.Printf("-----> GetGameStatus: playerNumber: %d, status: %+v", playerNumber, status)
+	stat := mapGameStatus(&status)
+	log.Printf("-----> StanGry: %+v", stat)
+	return stat, nil
 }
 
 func mapGameStatus(status *GameStatus) *proto.StanGry {
@@ -42,7 +47,7 @@ func mapGameStatus(status *GameStatus) *proto.StanGry {
 func mapCards(cards []Card) []proto.Karta {
 	karty := []proto.Karta{}
 	for _, c := range cards {
-		karty = append(karty, proto.Karta(proto.Karta_value[string(c.typ)]))
+		karty = append(karty, proto.Karta(proto.Karta_value[string(c.Symbol)]))
 	}
 	return karty
 }
