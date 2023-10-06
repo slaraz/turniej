@@ -19,7 +19,7 @@ const (
 
 type serwer struct {
 	proto.UnimplementedGraServer
-	arena *silnik.ArenaGry
+	arena *silnik.Arena
 }
 
 func (s *serwer) NowyMecz(ctx context.Context, conf *proto.KonfiguracjaGry) (*proto.NowaGraInfo, error) {
@@ -30,7 +30,6 @@ func (s *serwer) NowyMecz(ctx context.Context, conf *proto.KonfiguracjaGry) (*pr
 
 	info := &proto.NowaGraInfo{
 		GraID: graID,
-		Opis:  fmt.Sprintf("nowa graID=%q dla %d graczy", graID, conf.LiczbaGraczy),
 	}
 	return info, nil
 }
@@ -41,26 +40,19 @@ func (s *serwer) DolaczDoGry(ctx context.Context, dolacz *proto.Dolaczanie) (*pr
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
-	graczID, err := gra.DolaczGracza(dolacz.Wizytowka.Nazwa)
+	graczID, err := gra.DolaczGracza(dolacz.NazwaGracza)
 	if err != nil {
 		return nil, status.Error(codes.ResourceExhausted, err.Error())
 	}
 
-	log.Printf("DolaczDoGry: gracz %q dołączył do gry %q", dolacz.Wizytowka.Nazwa, dolacz.GraID)
+	log.Printf("DolaczDoGry: gracz %q dołączył do gry %q", dolacz.NazwaGracza, dolacz.GraID)
 
 	stanGry, err := gra.StanGry(graczID)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("gra.StanGry: %v", err.Error()))
 	}
 
-	pstanGry := &proto.StanGry{
-		GraczID:           graczID,
-		GraID:             dolacz.GraID,
-		SytuacjaNaPlanszy: stanGry,
-		TwojeKarty:        "A4,X8",
-	}
-
-	return pstanGry, nil
+	return stanGry, nil
 }
 
 func (s *serwer) MojRuch(ctx context.Context, ruch *proto.RuchGracza) (*proto.StanGry, error) {
@@ -69,24 +61,17 @@ func (s *serwer) MojRuch(ctx context.Context, ruch *proto.RuchGracza) (*proto.St
 		return nil, status.Error(codes.Internal, fmt.Sprintf("arena.GetGra: %v", err.Error()))
 	}
 
-	err = gra.WykonajRuch(ruch.GraczID, ruch.ZagranaKarta)
+	graczID, err := gra.WykonajRuch(ruch.GraczID, ruch.ZagranaKarta)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	stanGry, err := gra.StanGry(ruch.GraczID)
+	stanGry, err := gra.StanGry(graczID)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("gra.StanGry: %v", err.Error()))
 	}
 
-	pstanGry := &proto.StanGry{
-		GraID:             ruch.GraID,
-		GraczID:           ruch.GraczID,
-		SytuacjaNaPlanszy: stanGry,
-		TwojeKarty:        "A4,X8",
-	}
-
-	return pstanGry, nil
+	return stanGry, nil
 }
 
 func main() {

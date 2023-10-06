@@ -4,15 +4,15 @@ import (
 	"fmt"
 )
 
-type ArenaGry struct {
+type Arena struct {
 	aktywneGry   map[string]*gra
 	kanNewGra    chan reqNewGra
 	kanGetGra    chan reqGetGra
 	kanKoniecGry chan reqKoniecGry
 }
 
-func NowaArena() *ArenaGry {
-	arena := &ArenaGry{
+func NowaArena() *Arena {
+	arena := &Arena{
 		aktywneGry:   map[string]*gra{},
 		kanNewGra:    make(chan reqNewGra),
 		kanGetGra:    make(chan reqGetGra),
@@ -33,7 +33,7 @@ type odpNowaGra struct {
 	err   error
 }
 
-func (arena *ArenaGry) NowaGra(iluGraczy int) (string, error) {
+func (arena *Arena) NowaGra(iluGraczy int) (string, error) {
 	kanOdp := make(chan odpNowaGra)
 	arena.kanNewGra <- reqNewGra{
 		iluGraczy: iluGraczy,
@@ -53,7 +53,7 @@ type odpGetGra struct {
 	err error
 }
 
-func (arena *ArenaGry) GetGra(graID string) (*gra, error) {
+func (arena *Arena) GetGra(graID string) (*gra, error) {
 	kanOdp := make(chan odpGetGra)
 	arena.kanGetGra <- reqGetGra{
 		graID:  graID,
@@ -68,7 +68,7 @@ type reqKoniecGry struct {
 	err   error
 }
 
-func (arena *ArenaGry) arenaFlow() {
+func (arena *Arena) arenaFlow() {
 	for {
 		select {
 

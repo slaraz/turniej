@@ -1,13 +1,14 @@
 package turtles
 
 import (
-	"encoding/json"
+	"github.com/slaraz/turniej/gra_go/proto"
 )
 
 type Move struct {
 	CardSymbol string `json:"cardSymbol"`
 	Color      string `json:"color"`
 }
+
 type GameStatus struct {
 	Board []Field `json:"board"`
 	Cards []Card  `json:"cards"`
@@ -15,9 +16,11 @@ type GameStatus struct {
 	IsEnd bool    `json:"isEnd"`
 }
 
-func (game *Game) GetGameStatus(playerNumber int) (string, error) {
+// GetGameStatus - return game status for player
+// playerNumber starts from 1
+func (game *Game) GetGameStatus(playerNumber int) (*proto.StanGry, error) {
 	if playerNumber-1 > len(game.players) {
-		return "", ErrInvalidPlayerNumber
+		return nil, ErrInvalidPlayerNumber
 	}
 	status := GameStatus{
 		Board: game.board,
@@ -25,20 +28,45 @@ func (game *Game) GetGameStatus(playerNumber int) (string, error) {
 		Winer: game.winer,
 		IsEnd: game.isEnd,
 	}
-	json, _ := json.Marshal(status)
-	return string(json), nil
+	return mapGameStatus(&status), nil
 }
-func (game *Game) Move(moveStr string) error {
-	move := Move{}
-	err := json.Unmarshal([]byte(moveStr), &move)
+
+func mapGameStatus(status *GameStatus) *proto.StanGry {
+	return &proto.StanGry{
+		TwojeKarty: mapCards(status.Cards),
+		Plansza:    mapBoard(status.Board),
+		CzyKoniec:  status.IsEnd,
+		KtoWygral:  int32(status.Winer),
+	}
+}
+func mapCards(cards []Card) []proto.Karta {
+	karty := []proto.Karta{}
+	for _, c := range cards {
+		karty = append(karty, proto.Karta(proto.Karta_value[string(c.typ)]))
+	}
+	return karty
+}
+func mapBoard(board []Field) []*proto.Pole {
+	pola := []*proto.Pole{}
+	for _, b := range board {
+		pole := &proto.Pole{
+			Zolwie: []proto.KolorZolwia{},
+		}
+		for _, t := range b.Pawns {
+			pole.Zolwie = append(pole.Zolwie, proto.KolorZolwia(proto.KolorZolwia_value[string(t)]))
+		}
+		pola = append(pola, pole)
+	}
+	return pola
+}
+
+// Move - player move
+func (game *Game) Move(kolor proto.KolorZolwia, cardSymbol proto.Karta) error {
+	card, err := findCard(Symbol(cardSymbol))
 	if err != nil {
 		return err
 	}
-	card, err := findCard(Symbol(move.CardSymbol))
-	if err != nil {
-		return err
-	}
-	color := getColor(move.Color)
+	color := getColor(proto.KolorZolwia_name[int32(kolor)])
 	err, winer := game.playCard(card, color)
 	if winer > 0 {
 		game.winer = winer
@@ -50,8 +78,10 @@ func (game *Game) Move(moveStr string) error {
 	}
 	return nil
 }
-func CreateNewGame(numberOfPlayers int) Game {
-	game := Game{
+
+// CreateNewGame - create new game
+func CreateNewGame(numberOfPlayers int) *Game {
+	game := &Game{
 		board:      CreateGameBoard("a"),
 		deck:       CreateGameDeck("a"),
 		players:    generatePlayers(numberOfPlayers),

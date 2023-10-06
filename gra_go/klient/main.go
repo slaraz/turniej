@@ -63,7 +63,7 @@ func main() {
 
 	// Dołączamy do gry graID.
 	stanGry := dolaczDoGry(c, *graID, *nazwa)
-	fmt.Printf("Stan gry: plansza: %q, karty: %q\n", stanGry.SytuacjaNaPlanszy, stanGry.TwojeKarty)
+	fmt.Printf("Stan gry: plansza: %v, karty: %v\n", stanGry.Plansza, stanGry.TwojeKarty)
 
 	// Przebieg gry.
 	for {
@@ -78,22 +78,27 @@ func main() {
 			GraczID:      stanGry.GraczID,
 			ZagranaKarta: karta,
 		})
-		fmt.Printf("Stan gry: plansza: %q, karty: %q\n", stanGry.SytuacjaNaPlanszy, stanGry.TwojeKarty)
+		fmt.Printf("Stan gry: plansza: %v, karty: %v\n", stanGry.Plansza, stanGry.TwojeKarty)
 
-		if koniecGry(stanGry) {
+		if stanGry.CzyKoniec {
+			fmt.Println("Koniec gry, wygrał gracz nr", stanGry.KtoWygral)
 			break
 		}
 	}
 }
 
-func wczytajKarte() string {
+func wczytajKarte() proto.Karta {
 	fmt.Print("> ")
 	var karta string
 	_, err := fmt.Scanln(&karta)
 	if err != nil {
 		log.Fatalf("Błąd wczytywania karty: %v", err)
 	}
-	return karta
+	k, ok := proto.Karta_value[karta]
+	if !ok {
+		log.Fatalf("Niepoprawna karta: %q", karta)
+	}
+	return proto.Karta(k)
 }
 
 func dolaczDoGry(c proto.GraClient, graID, nazwa string) *proto.StanGry {
@@ -102,10 +107,8 @@ func dolaczDoGry(c proto.GraClient, graID, nazwa string) *proto.StanGry {
 	defer cancel()
 	log.Println("Czekam na stan gry...")
 	stanGry, err := c.DolaczDoGry(ctx, &proto.Dolaczanie{
-		GraID: graID,
-		Wizytowka: &proto.WizytowkaGracza{
-			Nazwa: nazwa,
-		},
+		GraID:       graID,
+		NazwaGracza: nazwa,
 	})
 	if err != nil {
 		log.Fatalf("c.Dolacz: %v", err)
@@ -118,7 +121,7 @@ func wyslijRuch(c proto.GraClient, ruch *proto.RuchGracza) *proto.StanGry {
 	ctx, cancel := context.WithTimeout(context.Background(), RUCH_GRACZA_TIMEOUT)
 	defer cancel()
 	log.Println("Czekam na stan gry...")
-	
+
 	stanGry, err := c.MojRuch(ctx, ruch)
 	if err != nil {
 		log.Fatalf("c.MojRuch: %v", err)
@@ -127,5 +130,5 @@ func wyslijRuch(c proto.GraClient, ruch *proto.RuchGracza) *proto.StanGry {
 }
 
 func koniecGry(stanGry *proto.StanGry) bool {
-	return stanGry.SytuacjaNaPlanszy == "KONIEC"
+	return stanGry.CzyKoniec
 }
