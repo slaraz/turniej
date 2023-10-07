@@ -10,26 +10,32 @@ type Move struct {
 	Color      string `json:"color"`
 }
 type GameStatus struct {
-	Board []Field `json:"board"`
-	Cards []Card  `json:"cards"`
-	Winer int     `json:"winer"`
-	IsEnd bool    `json:"isEnd"`
+	Board       []Field `json:"board"`
+	Cards       []Card  `json:"cards"`
+	Winer       int     `json:"winer"`
+	IsEnd       bool    `json:"isEnd"`
+	TurtleColor string  `json:"turtleColor"`
 }
 
 func (game *Game) GetGameStatus(playerNumber int) (string, error) {
-	if playerNumber-1 > len(game.players) {
+	if playerNumber-1 > len(game.players) || playerNumber-1 < 0 {
 		return "", ErrInvalidPlayerNumber
 	}
 	status := GameStatus{
-		Board: game.board,
-		Cards: game.players[playerNumber-1].Cards,
-		Winer: game.winer,
-		IsEnd: game.isEnd,
+		Board:       game.board,
+		Cards:       game.players[playerNumber-1].Cards,
+		TurtleColor: string(game.players[playerNumber-1].Color),
+		Winer:       game.winer, //IF WINER IS -1 THEN NO WINER
+		IsEnd:       game.isEnd,
 	}
 	json, _ := json.Marshal(status)
 	return string(json), nil
 }
-func (game *Game) Move(moveStr string) error {
+func (game *Game) Move(moveStr string, playerNumber int) error {
+	playerNumber = playerNumber - 1
+	if playerNumber > len(game.players) || playerNumber < 0 {
+		return ErrInvalidPlayerNumber
+	}
 	move := Move{}
 	err := json.Unmarshal([]byte(moveStr), &move)
 	if err != nil {
@@ -42,14 +48,12 @@ func (game *Game) Move(moveStr string) error {
 	}
 	move.Color = strings.ToLower(move.Color)
 	color := getColor(move.Color)
-	err, winer := game.playCard(card, color)
-	if winer > 0 {
-		game.winer = winer
-		game.isEnd = true
-		return nil
-	}
+	err = game.playCard(card, color, playerNumber)
 	if err != nil {
 		return err
+	}
+	if game.isEnd {
+		return nil
 	}
 	return nil
 }

@@ -30,7 +30,9 @@ func MovePawn(board []Field, pawn Color, move int) ([]Field, error) {
 	if newIndex >= len(board) {
 		newIndex = len(board) - 1
 	}
-
+	if fieldNumber < 0 && newIndex < 0 {
+		return board, nil
+	}
 	if fieldNumber == -1 || pawnNumber == -1 {
 		board[newIndex].Pawns = append(board[newIndex].Pawns, pawn)
 		return board, nil

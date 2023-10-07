@@ -164,7 +164,7 @@ func TestMovePawn(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Pawn out of board",
+			name: "Pawn out of board right side",
 			args: args{
 				board: []Field{
 					{Pawns: []Color{Red}},
@@ -173,21 +173,43 @@ func TestMovePawn(t *testing.T) {
 				pawn: Red,
 				move: 4,
 			},
-			want:    nil,
-			wantErr: true,
+			want: []Field{
+				{Pawns: []Color{}},
+				{Pawns: []Color{Green, Blue}},
+				{Pawns: []Color{Red}}},
+			wantErr: false,
 		},
 		{
-			name: "Pawn out of board",
+			name: "Pawn out of board left side",
 			args: args{
 				board: []Field{
 					{Pawns: []Color{Red}},
 					{Pawns: []Color{Green, Blue}},
 					{Pawns: []Color{}}},
-				pawn: Green,
+				pawn: Blue,
 				move: -4,
 			},
-			want:    nil,
-			wantErr: true,
+			want: []Field{
+				{Pawns: []Color{Red}},
+				{Pawns: []Color{Green}},
+				{Pawns: []Color{}}},
+			wantErr: false,
+		},
+		{
+			name: "Pawn out of board left side and pawn is out of board",
+			args: args{
+				board: []Field{
+					{Pawns: []Color{Red}},
+					{Pawns: []Color{}},
+					{Pawns: []Color{}}},
+				pawn: Blue,
+				move: -4,
+			},
+			want: []Field{
+				{Pawns: []Color{Red}},
+				{Pawns: []Color{}},
+				{Pawns: []Color{}}},
+			wantErr: false,
 		},
 	}
 

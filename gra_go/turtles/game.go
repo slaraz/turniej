@@ -42,27 +42,18 @@ func (game *Game) dealTheCards() {
 	}
 }
 
-func (game *Game) getPlayerCards(playerNumber int) ([]Card, error) {
-
-	if playerNumber > len(game.players) {
-		return nil, ErrInvalidPlayerNumber
+func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
+	if game.isEnd {
+		return ErrGameIsOver
 	}
-	playerNumber = playerNumber - 1
-	if playerNumber < 0 {
-		return nil, ErrInvalidPlayerNumber
-	}
-	return game.players[playerNumber].Cards, nil
-}
-
-func (game *Game) playCard(c Card, color Color) (err error, winingPlayer int) {
-	player := game.players[game.playerTurn]
-	if err := game.checkIfCardAndColorIsValid(c, color); err != nil {
-		return err, -1
+	player := game.players[playerNumber]
+	if err := game.checkIfCardAndColorIsValid(c, color, playerNumber); err != nil {
+		return err
 	}
 	if c.typ == LastOne && c.color == Default && color == Default {
 		colors := findLastOnePawns(game.board)
 		if len(colors) != 1 {
-			return ErrPickTheColor, -1
+			return ErrPickTheColor
 		}
 		c.color = Colors[0]
 	}
@@ -73,11 +64,11 @@ func (game *Game) playCard(c Card, color Color) (err error, winingPlayer int) {
 	}
 	b, err := MovePawn(game.board, col, c.move)
 	if err != nil {
-		return err, -1
+		return err
 	}
 	game.board = b
 
-	endGame, color := CheckIfGameOver(game.board)
+	endGame, _ := CheckIfGameOver(game.board)
 	if endGame {
 		game.isEnd = true
 		_, pi := findWinner(game.board, game.players)
@@ -90,7 +81,7 @@ func (game *Game) playCard(c Card, color Color) (err error, winingPlayer int) {
 		game.usedDeck = Deck{}
 	}
 	if err != nil {
-		return err, -1
+		return err
 	}
 	player.Cards = append(player.Cards, newCard)
 	game.players[game.playerTurn] = player
@@ -98,7 +89,7 @@ func (game *Game) playCard(c Card, color Color) (err error, winingPlayer int) {
 	if game.playerTurn >= len(game.players) {
 		game.playerTurn = 0
 	}
-	return nil, -1
+	return nil
 }
 func findLastOnePawns([]Field) []Color {
 	for _, f := range []Field{} {
@@ -108,8 +99,8 @@ func findLastOnePawns([]Field) []Color {
 	}
 	return Colors
 }
-func (game *Game) checkIfCardAndColorIsValid(card Card, color Color) error {
-	player := game.players[game.playerTurn]
+func (game *Game) checkIfCardAndColorIsValid(card Card, color Color, playerNumber int) error {
+	player := game.players[playerNumber]
 	if !checkIfExist(player.Cards, card) {
 		return ErrInvalidCard
 	}
