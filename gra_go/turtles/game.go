@@ -5,7 +5,10 @@ import (
 	"time"
 )
 
-var maxCardForPlayer = 5
+const (
+	NUMBER_OF_FIELDS_ON_THE_BOARD = 2
+	MAX_CARD_FOR_PLAYER           = 5
+)
 
 type Game struct {
 	board      []Field
@@ -29,12 +32,12 @@ func generatePlayers(numberOfPlayers int) []Player {
 	players := make([]Player, numberOfPlayers)
 	colors := shuffleColorsd(Colors)
 	for i := 0; i < numberOfPlayers; i++ {
-		players[i] = Player{Color: colors[i]} ///TODO shuffle the colors
+		players[i] = Player{Color: colors[i]}
 	}
 	return players
 }
 func (game *Game) dealTheCards() {
-	for j := 0; j < maxCardForPlayer; j++ {
+	for j := 0; j < MAX_CARD_FOR_PLAYER; j++ {
 		for i := range game.players {
 			card, _ := game.deck.GetCardFromDeck()
 			game.players[i].Cards = append(game.players[i].Cards, card)
@@ -75,14 +78,15 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 		game.winer = pi
 	}
 	newCard, err := game.deck.GetCardFromDeck()
+	if err != nil {
+		return err
+	}
 	game.usedDeck = append(game.usedDeck, c)
 	if len(game.deck) == 0 {
 		game.deck = game.usedDeck
 		game.usedDeck = Deck{}
 	}
-	if err != nil {
-		return err
-	}
+
 	player.Cards = append(player.Cards, newCard)
 	game.players[game.playerTurn] = player
 	game.playerTurn = (game.playerTurn) + 1

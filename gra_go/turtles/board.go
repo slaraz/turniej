@@ -1,9 +1,5 @@
 package turtles
 
-const (
-	NUMBER_OF_FIELDS_ON_THE_BOARD = 2
-)
-
 var gameBoards = map[string][]Field{}
 
 type Field struct {
