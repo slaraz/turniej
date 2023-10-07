@@ -60,7 +60,6 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 		}
 		c.color = Colors[0]
 	}
-	player.Cards = removeCard(player.Cards, c)
 	col := c.color
 	if c.color == Default {
 		col = color
@@ -76,7 +75,9 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 		game.isEnd = true
 		_, pi := findWinner(game.board, game.players)
 		game.winer = pi
+		return nil
 	}
+	player.Cards = removeCard(player.Cards, c)
 	newCard, err := game.deck.GetCardFromDeck()
 	if err != nil {
 		return err
