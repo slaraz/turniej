@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "klient": {
+      "commandName": "Project",
+      "commandLineArgs": "--nowa"
+    }
+  }
+}
