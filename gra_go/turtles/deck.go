@@ -68,7 +68,7 @@ var G2 = Symbol("G2")
 var G3 = Symbol("G1B")
 var B1 = Symbol("B1")
 var B2 = Symbol("B2")
-var B3 = Symbol("B-1")
+var B3 = Symbol("B1B")
 var Y1 = Symbol("Y1")
 var Y2 = Symbol("Y2")
 var Y3 = Symbol("Y1B")
@@ -78,7 +78,7 @@ var P3 = Symbol("P1B")
 var D1 = Symbol("A1")
 var D3 = Symbol("A1B")
 var DL1 = Symbol("L1")
-var DL2 = Symbol("L2B")
+var DL2 = Symbol("L2")
 
 var DefaultDeck = []Card{
 	{1, Red, 1, Normal, R1},

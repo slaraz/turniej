@@ -41,11 +41,12 @@ message Pole {
 }
 
 enum KolorZolwia {
-    RED = 0;
-    GREEN = 1;
-    BLUE = 2;
-    YELLOW = 3;
-    PURPLE = 4;
+    XXX = 0;
+    RED = 1;
+    GREEN = 2;
+    BLUE = 3;
+    YELLOW = 4;
+    PURPLE = 5;
 }
 
 message RuchGracza {
@@ -56,23 +57,24 @@ message RuchGracza {
 }
 
 enum Karta {
-    R1 = 0; // czerwony jeden do przodu
-    R2 = 1; // czerwony dwa do przodu
-    R1B = 2; //czerwony jeden do tyłu
-    G1 = 3; // zielony
-    G2 = 4;
-    G1B = 5;
-    B1 = 6; // niebieski
-    B2 = 7;
-    B1B = 8;
-    Y1 = 9; // żółty
-    Y2 = 10;
-    Y1B = 11;
-    P1 = 12; // fioletowy
-    P2 = 13;
-    P1B = 14;
-    L1 = 17; // ostatni
-    L2 = 18;
-    A1 = 15; // dowolny
-    A1B = 16;
+    XX = 0; // czerwony jeden do przodu
+    R1 = 1; // czerwony jeden do przodu
+    R2 = 2; // czerwony dwa do przodu
+    R1B = 3; //czerwony jeden do tyłu
+    G1 = 4; // zielony
+    G2 = 5;
+    G1B = 6;
+    B1 = 7; // niebieski
+    B2 = 8;
+    B1B = 9;
+    Y1 = 10; // żółty
+    Y2 = 11;
+    Y1B = 12;
+    P1 = 13; // fioletowy
+    P2 = 14;
+    P1B = 15;
+    L1 = 16; // ostatni
+    L2 = 17;
+    A1 = 18; // dowolny
+    A1B = 19;
 }

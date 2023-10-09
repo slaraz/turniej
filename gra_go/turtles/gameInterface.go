@@ -50,7 +50,7 @@ func mapGameStatus(status *GameStatus) *proto.StanGry {
 func mapCards(cards []Card) []proto.Karta {
 	karty := []proto.Karta{}
 	for _, c := range cards {
-		karty = append(karty, proto.Karta(proto.Karta_value[string(c.Symbol)]))
+		karty = append(karty, mapKarta(c))
 	}
 	return karty
 }
@@ -61,11 +61,20 @@ func mapBoard(board []Field) []*proto.Pole {
 			Zolwie: []proto.KolorZolwia{},
 		}
 		for _, t := range b.Pawns {
-			pole.Zolwie = append(pole.Zolwie, proto.KolorZolwia(proto.KolorZolwia_value[strings.ToUpper(string(t))]))
+			pole.Zolwie = append(pole.Zolwie, mapKolor(t))
 		}
 		pola = append(pola, pole)
 	}
 	return pola
+}
+
+func mapKarta(card Card) proto.Karta {
+	karta := proto.Karta(proto.Karta_value[string(card.Symbol)])
+	return karta
+}
+func mapKolor(color Color) proto.KolorZolwia {
+	kolorZolwia := proto.KolorZolwia(proto.KolorZolwia_value[strings.ToUpper(string(color))])
+	return kolorZolwia
 }
 
 // Move - player move
@@ -79,7 +88,7 @@ func (game *Game) Move(kolor proto.KolorZolwia, cardSymbol proto.Karta, playerNu
 	if err != nil {
 		return err
 	}
-	color := getColor(proto.KolorZolwia_name[int32(kolor)])
+	color := getColor(strings.ToLower(proto.KolorZolwia_name[int32(kolor)]))
 	err = game.playCard(card, color, playerNumber)
 
 	return err

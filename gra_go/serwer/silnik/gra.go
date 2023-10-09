@@ -80,7 +80,7 @@ func (g *gra) DolaczGracza(nazwaGracza string) (string, error) {
 }
 
 type reqRuchGracza struct {
-	karta  proto.Karta
+	ruch   *proto.RuchGracza
 	kanOdp chan odpRuchGracza
 }
 
@@ -88,22 +88,22 @@ type odpRuchGracza struct {
 	err error
 }
 
-func (g *gra) WykonajRuch(graczID string, zagranaKarta proto.Karta) (string, error) {
+func (g *gra) WykonajRuch(graczID string, ruch *proto.RuchGracza) (string, error) {
 	gracz, ok := g.graczeByID[graczID]
 	if !ok {
 		return "", fmt.Errorf("%s WykonajRuch((): nie ma gracza: %q", g.graID, graczID)
 	}
 	kanOdp := make(chan odpRuchGracza)
-	log.Printf("%s WykonajRuch(): %s rząda wykonania ruchu %q\n", g.graID, gracz.nazwaGracza, zagranaKarta)
+	log.Printf("%s WykonajRuch(): %s rząda wykonania ruchu %q %q\n", g.graID, gracz.nazwaGracza, ruch.ZagranaKarta, ruch.KolorWybrany)
 	gracz.kanRuch <- reqRuchGracza{
-		karta:  zagranaKarta,
+		ruch:  ruch,
 		kanOdp: kanOdp,
 	}
 	odp := <-kanOdp
 	if odp.err != nil {
-		log.Printf("%s WykonajRuch(): %s wykonał błędny ruch %q: %v\n", g.graID, gracz.nazwaGracza, zagranaKarta, odp.err)
+		log.Printf("%s WykonajRuch(): %s wykonał błędny ruch %q: %v\n", g.graID, gracz.nazwaGracza, ruch.ZagranaKarta, odp.err)
 	} else {
-		log.Printf("%s WykonajRuch(): %s wykonanał ruch %q\n", g.graID, gracz.nazwaGracza, zagranaKarta)
+		log.Printf("%s WykonajRuch(): %s wykonanał ruch %q\n", g.graID, gracz.nazwaGracza, ruch.ZagranaKarta)
 	}
 	return gracz.graczID, odp.err
 }
@@ -197,7 +197,7 @@ func (g *gra) przebiegRozgrywki() {
 		case req := <-ruszajacyGracz.kanRuch:
 
 			// LOGIKA GRY
-			err := g.logika.Move(ruszajacyGracz.kolorZolwia, req.karta, i+1)
+			err := g.logika.Move(req.ruch.KolorWybrany, req.ruch.ZagranaKarta, i+1)
 			if err != nil {
 				req.kanOdp <- odpRuchGracza{err: err}
 				continue

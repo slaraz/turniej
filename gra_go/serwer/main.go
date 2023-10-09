@@ -61,7 +61,7 @@ func (s *serwer) MojRuch(ctx context.Context, ruch *proto.RuchGracza) (*proto.St
 		return nil, status.Error(codes.Internal, fmt.Sprintf("arena.GetGra: %v", err.Error()))
 	}
 
-	graczID, err := gra.WykonajRuch(ruch.GraczID, ruch.ZagranaKarta)
+	graczID, err := gra.WykonajRuch(ruch.GraczID, ruch)
 	if err != nil {
 		log.Printf("MojRuch: gra.WykonajRuch: %v", err.Error())
 		return nil, status.Error(codes.InvalidArgument, err.Error())
