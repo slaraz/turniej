@@ -9,7 +9,9 @@ import (
 
 	"github.com/slaraz/turniej/gra_go/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -63,7 +65,7 @@ func main() {
 
 	// Dołączamy do gry graID.
 	stanGry := dolaczDoGry(c, *graID, *nazwa)
-	fmt.Printf("Stan gry: plansza: %v, karty: %v\n", stanGry.Plansza, stanGry.TwojeKarty)
+	drukujStatus(stanGry)
 
 	// Przebieg gry.
 	for {
@@ -78,11 +80,16 @@ func main() {
 				GraID:        stanGry.GraID,
 				GraczID:      stanGry.GraczID,
 				ZagranaKarta: karta,
-			}); err != nil {
+			}); err != nil && status.Code(err) == codes.InvalidArgument {
+				// zły ruch
 				fmt.Printf("Błąd ruchu: %v\n", err)
 				continue
+			} else if err != nil {
+				// inny błąd, np. połączenie z serwerem
+				log.Fatalf("wyslijRuch: status: %v, err: %v", status.Code(err), err)
 			}
-			fmt.Printf("Stan gry: plansza: %v, karty: %v\n", stanGry.Plansza, stanGry.TwojeKarty)
+			// ruch ok
+			drukujStatus(stanGry)
 			break
 		}
 
@@ -136,4 +143,8 @@ func wyslijRuch(c proto.GraClient, ruch *proto.RuchGracza) (*proto.StanGry, erro
 
 func koniecGry(stanGry *proto.StanGry) bool {
 	return stanGry.CzyKoniec
+}
+
+func drukujStatus(stanGry *proto.StanGry) {
+	fmt.Printf("Twój kolor: %v, Plansza: %v, karty: %v\n", stanGry.TwojKolor, stanGry.Plansza, stanGry.TwojeKarty)
 }

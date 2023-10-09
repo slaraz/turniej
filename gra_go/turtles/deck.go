@@ -75,10 +75,10 @@ var Y3 = Symbol("Y1B")
 var P1 = Symbol("P1")
 var P2 = Symbol("P2")
 var P3 = Symbol("P1B")
-var D1 = Symbol("D1")
-var D3 = Symbol("D-1")
-var DL1 = Symbol("DL1")
-var DL2 = Symbol("DL2")
+var D1 = Symbol("A1")
+var D3 = Symbol("A1B")
+var DL1 = Symbol("L1")
+var DL2 = Symbol("L2B")
 
 var DefaultDeck = []Card{
 	{1, Red, 1, Normal, R1},

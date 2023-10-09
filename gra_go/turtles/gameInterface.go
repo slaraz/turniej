@@ -2,6 +2,7 @@ package turtles
 
 import (
 	"log"
+	"strings"
 
 	"github.com/slaraz/turniej/gra_go/proto"
 )
@@ -60,7 +61,7 @@ func mapBoard(board []Field) []*proto.Pole {
 			Zolwie: []proto.KolorZolwia{},
 		}
 		for _, t := range b.Pawns {
-			pole.Zolwie = append(pole.Zolwie, proto.KolorZolwia(proto.KolorZolwia_value[string(t)]))
+			pole.Zolwie = append(pole.Zolwie, proto.KolorZolwia(proto.KolorZolwia_value[strings.ToUpper(string(t))]))
 		}
 		pola = append(pola, pole)
 	}
@@ -74,7 +75,7 @@ func (game *Game) Move(kolor proto.KolorZolwia, cardSymbol proto.Karta, playerNu
 		return ErrInvalidPlayerNumber
 	}
 
-	card, err := findCard(Symbol(cardSymbol))
+	card, err := findCard(Symbol(proto.Karta_name[int32(cardSymbol)]))
 	if err != nil {
 		return err
 	}

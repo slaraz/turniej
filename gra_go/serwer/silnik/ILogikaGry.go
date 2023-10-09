@@ -7,7 +7,7 @@ import (
 
 type ILogikaGry interface {
 	GetGameStatus(playerNumber int) (*proto.StanGry, error)
-	Move(playerColor proto.KolorZolwia, cardSymbol proto.Karta) error
+	Move(playerColor proto.KolorZolwia, cardSymbol proto.Karta, playerNumber int) error
 }
 
 func getLogikaGry(liczbaGraczy int) ILogikaGry {

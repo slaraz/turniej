@@ -172,54 +172,45 @@ func (g *gra) przebiegRozgrywki() {
 	i := 0
 
 	// wyślij pierwszy status
-	ruszajacyGracz := gracze[i]
-	stan, _ := g.logika.GetGameStatus(i + 1)
-	timeout2 := time.After(WYSLIJ_STATUS_TIMEOUT)
-	select {
-	case ruszajacyGracz.kanStan <- stan:
-	case <-timeout2:
-		g.koniec(fmt.Errorf("%s upłynął czas dla gracza: %s", g.graID, ruszajacyGracz.nazwaGracza))
-		return
-	}
-	log.Printf("%s Rozgrywka3: wysłano status dla gracza %q\n", g.graID, ruszajacyGracz.nazwaGracza)
-
 	for {
-		ruszajacyGracz = gracze[i]
+		ruszajacyGracz := gracze[i]
+
+		// status ---->
+
+		// LOGIKA GRY
+		stan, _ := g.logika.GetGameStatus(i + 1)
+
+		timeout2 := time.After(WYSLIJ_STATUS_TIMEOUT)
+		select {
+		case ruszajacyGracz.kanStan <- stan:
+		case <-timeout2:
+			g.koniec(fmt.Errorf("%s upłynął czas dla gracza: %s", g.graID, ruszajacyGracz.nazwaGracza))
+			return
+		}
+		log.Printf("%s Rozgrywka3: wysłano status dla gracza %q\n", g.graID, ruszajacyGracz.nazwaGracza)
 
 		log.Printf("%s Rozgrywka4: ruszający gracz %d %q\n", g.graID, i, ruszajacyGracz.nazwaGracza)
 
+		// ruch ---->
 		timeout1 := time.After(RUCH_GRACZA_TIMEOUT)
 		select {
 		case req := <-ruszajacyGracz.kanRuch:
 
-			err := g.logika.Move(ruszajacyGracz.kolorZolwia, req.karta)
+			// LOGIKA GRY
+			err := g.logika.Move(ruszajacyGracz.kolorZolwia, req.karta, i+1)
 			if err != nil {
 				req.kanOdp <- odpRuchGracza{err: err}
 				continue
 			} else {
 				req.kanOdp <- odpRuchGracza{}
 			}
-
 		case <-timeout1:
 			g.koniec(fmt.Errorf("%s upłynął czas ruchu dla gracza: %s", g.graID, ruszajacyGracz.nazwaGracza))
 			return
 		}
-
 		log.Printf("%s Rozgrywka5: wykonano ruch gracza %q\n", g.graID, ruszajacyGracz.nazwaGracza)
 
 		i = g.nastepny(i)
-		nastepnyGracz := gracze[i]
-
-		stan, _ := g.logika.GetGameStatus(i)
-
-		timeout2 := time.After(WYSLIJ_STATUS_TIMEOUT)
-		select {
-		case nastepnyGracz.kanStan <- stan:
-		case <-timeout2:
-			g.koniec(fmt.Errorf("%s upłynął czas dla gracza: %s", g.graID, nastepnyGracz.nazwaGracza))
-			return
-		}
-		log.Printf("%s Rozgrywka6: wysłano status dla gracza %d %q\n", g.graID, i, nastepnyGracz.nazwaGracza)
 	} //for
 }
 
