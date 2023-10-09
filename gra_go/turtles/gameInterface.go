@@ -12,23 +12,25 @@ type Move struct {
 }
 
 type GameStatus struct {
-	Board []Field `json:"board"`
-	Cards []Card  `json:"cards"`
-	Winer int     `json:"winer"`
-	IsEnd bool    `json:"isEnd"`
+	Board       []Field `json:"board"`
+	Cards       []Card  `json:"cards"`
+	Winer       int     `json:"winer"`
+	IsEnd       bool    `json:"isEnd"`
+	TurtleColor string  `json:"turtleColor"`
 }
 
 // GetGameStatus - return game status for player
 // playerNumber starts from 1
 func (game *Game) GetGameStatus(playerNumber int) (*proto.StanGry, error) {
-	if playerNumber-1 > len(game.players) {
+	if playerNumber-1 > len(game.players) || playerNumber-1 < 0 {
 		return nil, ErrInvalidPlayerNumber
 	}
 	status := GameStatus{
-		Board: game.board,
-		Cards: game.players[playerNumber-1].Cards,
-		Winer: game.winer,
-		IsEnd: game.isEnd,
+		Board:       game.board,
+		Cards:       game.players[playerNumber-1].Cards,
+		TurtleColor: string(game.players[playerNumber-1].Color),
+		Winer:       game.winer, //IF WINER IS -1 THEN NO WINER
+		IsEnd:       game.isEnd,
 	}
 	log.Printf("-----> GetGameStatus: playerNumber: %d, status: %+v", playerNumber, status)
 	stat := mapGameStatus(&status)
@@ -66,22 +68,20 @@ func mapBoard(board []Field) []*proto.Pole {
 }
 
 // Move - player move
-func (game *Game) Move(kolor proto.KolorZolwia, cardSymbol proto.Karta) error {
+func (game *Game) Move(kolor proto.KolorZolwia, cardSymbol proto.Karta, playerNumber int) error {
+	playerNumber = playerNumber - 1
+	if playerNumber > len(game.players) || playerNumber < 0 {
+		return ErrInvalidPlayerNumber
+	}
+
 	card, err := findCard(Symbol(cardSymbol))
 	if err != nil {
 		return err
 	}
 	color := getColor(proto.KolorZolwia_name[int32(kolor)])
-	err, winer := game.playCard(card, color)
-	if winer > 0 {
-		game.winer = winer
-		game.isEnd = true
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	return nil
+	err = game.playCard(card, color, playerNumber)
+
+	return err
 }
 
 // CreateNewGame - create new game

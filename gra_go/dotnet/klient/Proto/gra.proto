@@ -1,0 +1,46 @@
+syntax = "proto3";
+option go_package = "github.com/slaraz/turniej/gra_go/proto";
+option csharp_namespace = "GraKlient";
+
+service Gra {
+    // tworzy mecz
+    // zwraca ID gry
+    rpc NowyMecz(KonfiguracjaGry) returns (NowaGraInfo) {}
+
+    // dołącza do nowej gry
+    rpc DolaczDoGry(Dolaczanie) returns (StanGry) {}
+
+    // ruch gracza klienta
+    rpc MojRuch(RuchGracza) returns (StanGry) {}
+}
+
+message KonfiguracjaGry {
+    int32 liczbaGraczy = 1;
+}
+
+message NowaGraInfo {
+    string graID = 1;
+    string opis = 2;
+}
+
+message WizytowkaGracza {
+    string nazwa = 1;
+}
+
+message Dolaczanie {
+    string graID = 1;
+    WizytowkaGracza wizytowka = 2;
+}
+
+message StanGry {
+    string graID = 1; 
+    string graczID = 2;
+    string sytuacjaNaPlanszy = 3;
+    string twojeKarty = 4;
+}
+
+message RuchGracza {
+    string graID = 1; 
+    string graczID = 2;
+    string zagranaKarta = 3;
+}

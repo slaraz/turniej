@@ -1,9 +1,5 @@
 package turtles
 
-const (
-	NUMBER_OF_FIELDS_ON_THE_BOARD = 2
-)
-
 var gameBoards = map[string][]Field{}
 
 type Field struct {
@@ -30,7 +26,9 @@ func MovePawn(board []Field, pawn Color, move int) ([]Field, error) {
 	if newIndex >= len(board) {
 		newIndex = len(board) - 1
 	}
-
+	if fieldNumber < 0 && newIndex < 0 {
+		return board, nil
+	}
 	if fieldNumber == -1 || pawnNumber == -1 {
 		board[newIndex].Pawns = append(board[newIndex].Pawns, pawn)
 		return board, nil

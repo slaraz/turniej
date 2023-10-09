@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"log"
@@ -13,34 +14,30 @@ import (
 )
 
 // TODO
+// 9. change number of fieldsD
 
-// 6. handle end game
-// 7. shuffle players colors
-// 8. case sensitive
-// 9. change number of fields
-// 10. server picks the player
 func main() {
 	log.Println("Hello World")
 
 	reader := bufio.NewReader(os.Stdin)
 	//log.Println("Enter text: ")
-	game := turtles.CreateNewGame(2)
+	game := turtles.CreateNewGame(3)
 
 	winer := 0
 	isEnd := false
-	for isEnd == false {
-		log.Println("Enter text: symbol,color")
+	for !isEnd {
+		log.Println("Enter text: symbol,playerNumber,color")
 		log.Printf("Player: %d", game.GetPlayerTurn())
 		res1, _ := game.GetGameStatus(game.GetPlayerTurn())
 		log.Println(res1)
 		text, _ := reader.ReadString('\n')
-		move, err := getCardFromText(text)
+		move, playerNumber, err := getCardFromText(text)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 		str, _ := json.Marshal(move)
-		err = game.Move(string(str))
+		err = game.Move(string(str), playerNumber)
 		if err != nil {
 			log.Println(err)
 			continue
@@ -51,29 +48,27 @@ func main() {
 		json.Unmarshal([]byte(res), &st)
 		isEnd = st.IsEnd
 		winer = st.Winer
-		log.Println(st)
+
 	}
 	log.Println("Winer is player: ", winer)
 
 }
-func getCardFromText(text string) (turtles.Move, error) {
+func getCardFromText(text string) (turtles.Move, int, error) {
 
 	text = strings.Replace(text, "\r", "", -1)
 	text = strings.Replace(text, "\n", "", -1)
 	c := strings.Split(text, ",")
-	if len(c) < 2 {
+	if len(c) < 3 {
 		c = strings.Split(text, " ")
 	}
-	if len(c) < 2 {
-		return turtles.Move{}, fmt.Errorf("invalid input")
+	if len(c) < 3 {
+		return turtles.Move{}, 0, fmt.Errorf("invalid input")
 	}
-
 	a := c[0]
-	color := getColor(c[1])
+	color := getColor(strings.ToLower(c[2]))
 	m := turtles.Move{CardSymbol: a, Color: string(color)}
-
-	return m, nil
-
+	playerNumber, err := strconv.Atoi(c[1])
+	return m, playerNumber, err
 }
 func getColor(text string) turtles.Color {
 	switch text {
