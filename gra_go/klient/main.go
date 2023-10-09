@@ -164,7 +164,7 @@ func wyslijRuch(c proto.GraClient, ruch *proto.RuchGracza) (*proto.StanGry, erro
 	log.Printf("Gracz %s-%s zagrywa kartę: %v", ruch.GraID, ruch.GraczID, ruch.ZagranaKarta)
 	ctx, cancel := context.WithTimeout(context.Background(), RUCH_GRACZA_TIMEOUT)
 	defer cancel()
-	log.Println("Czekam na odpowiedź od serwera...")
+	log.Println("Czekam na odpowiedź od serwera (ruch przeciwnika)...")
 
 	return c.MojRuch(ctx, ruch)
 }
