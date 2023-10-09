@@ -27,6 +27,7 @@ var (
 	nazwa = flag.String("nazwa", "Ziutek", "nazwa gracza")
 	nowa  = flag.Bool("nowa", false, "tworzy nową grę na serwerze")
 	graID = flag.String("gra", "", "dołącza do gry o podanym id")
+	lg = flag.Int("lg", 2, "określa liczbę graczy")
 )
 
 func main() {
@@ -48,7 +49,7 @@ func main() {
 	if *nowa {
 		ctx, cancel := context.WithTimeout(context.Background(), NOWY_MECZ_TIMEOUT)
 		defer cancel()
-		nowaGraInfo, err := c.NowyMecz(ctx, &proto.KonfiguracjaGry{LiczbaGraczy: 2})
+		nowaGraInfo, err := c.NowyMecz(ctx, &proto.KonfiguracjaGry{LiczbaGraczy: int32(*lg)})
 		if err != nil {
 			log.Fatalf("c.NowyMecz: %v", err)
 		}
@@ -172,6 +173,10 @@ func drukujStatus(stanGry *proto.StanGry) {
 	if stanGry.CzyKoniec {
 		fmt.Println("Koniec gry, wygrał gracz nr", stanGry.KtoWygral)
 	} else {
-		fmt.Printf("Twój kolor: %v, Plansza: %v, karty: %v\n", stanGry.TwojKolor, stanGry.Plansza, stanGry.TwojeKarty)
+		fmt.Printf("Twój kolor: %v, Pola:", stanGry.TwojKolor)
+		for _, pole := range stanGry.Plansza {
+			fmt.Printf(" %v", pole.Zolwie)
+		}
+		fmt.Printf(", Twoje karty: %v\n", stanGry.TwojeKarty)
 	}
 }

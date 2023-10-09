@@ -81,7 +81,7 @@ func getColor(text string) turtles.Color {
 	case "yellow":
 		return turtles.Yellow
 	case "purpule":
-		return turtles.Purpule
+		return turtles.Purple
 	default:
 		return turtles.Default
 	}

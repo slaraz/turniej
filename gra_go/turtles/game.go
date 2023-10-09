@@ -142,8 +142,8 @@ func getColor(text string) Color {
 		return Green
 	case "yellow":
 		return Yellow
-	case "purpule":
-		return Purpule
+	case "purple":
+		return Purple
 	default:
 		return Default
 	}

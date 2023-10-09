@@ -37,7 +37,7 @@ message StanGry {
 }
 
 message Pole {
-    repeated KolorZolwia zolwie = 1;
+    repeated KolorZolwia zolwie = 2;
 }
 
 enum KolorZolwia {
