@@ -15,8 +15,8 @@ import (
 const (
 	IP_ADDR               = "localhost:50051"
 	NOWY_MECZ_TIMEOUT     = time.Second * 5
-	DOLACZ_DO_GRY_TIMEOUT = time.Second * 150
-	RUCH_GRACZA_TIMEOUT   = time.Second * 150
+	DOLACZ_DO_GRY_TIMEOUT = time.Second * 1000
+	RUCH_GRACZA_TIMEOUT   = time.Second * 1000
 )
 
 var (
@@ -68,17 +68,23 @@ func main() {
 	// Przebieg gry.
 	for {
 
-		// Gracz podaje kartę na konsoli.
-		fmt.Println("Wybierz kartę do zagrania:")
-		karta := wczytajKarte()
+		for {
+			// Gracz podaje kartę na konsoli.
+			fmt.Println("Wybierz kartę do zagrania:")
+			karta := wczytajKarte()
 
-		// Wysyłam ruch do serwera.
-		stanGry = wyslijRuch(c, &proto.RuchGracza{
-			GraID:        stanGry.GraID,
-			GraczID:      stanGry.GraczID,
-			ZagranaKarta: karta,
-		})
-		fmt.Printf("Stan gry: plansza: %v, karty: %v\n", stanGry.Plansza, stanGry.TwojeKarty)
+			// Wysyłam ruch do serwera.
+			if stanGry, err = wyslijRuch(c, &proto.RuchGracza{
+				GraID:        stanGry.GraID,
+				GraczID:      stanGry.GraczID,
+				ZagranaKarta: karta,
+			}); err != nil {
+				fmt.Printf("Błąd ruchu: %v\n", err)
+				continue
+			}
+			fmt.Printf("Stan gry: plansza: %v, karty: %v\n", stanGry.Plansza, stanGry.TwojeKarty)
+			break
+		}
 
 		if stanGry.CzyKoniec {
 			fmt.Println("Koniec gry, wygrał gracz nr", stanGry.KtoWygral)
@@ -105,7 +111,7 @@ func dolaczDoGry(c proto.GraClient, graID, nazwa string) *proto.StanGry {
 	log.Printf("Gracz %s dołącza do gry %q", nazwa, graID)
 	ctx, cancel := context.WithTimeout(context.Background(), DOLACZ_DO_GRY_TIMEOUT)
 	defer cancel()
-	log.Println("Czekam na stan gry...")
+	log.Println("Czekam odpowiedź serwera...")
 	stanGry, err := c.DolaczDoGry(ctx, &proto.Dolaczanie{
 		GraID:       graID,
 		NazwaGracza: nazwa,
@@ -116,17 +122,16 @@ func dolaczDoGry(c proto.GraClient, graID, nazwa string) *proto.StanGry {
 	return stanGry
 }
 
-func wyslijRuch(c proto.GraClient, ruch *proto.RuchGracza) *proto.StanGry {
+func wyslijRuch(c proto.GraClient, ruch *proto.RuchGracza) (*proto.StanGry, error) {
 	log.Printf("Gracz %s-%s zagrywa kartę: %v", ruch.GraID, ruch.GraczID, ruch.ZagranaKarta)
 	ctx, cancel := context.WithTimeout(context.Background(), RUCH_GRACZA_TIMEOUT)
 	defer cancel()
-	log.Println("Czekam na stan gry...")
-
+	log.Println("Czekam odpowiedź serwera...")
 	stanGry, err := c.MojRuch(ctx, ruch)
 	if err != nil {
-		log.Fatalf("c.MojRuch: %v", err)
+		return nil, fmt.Errorf("c.MojRuch: %v", err)
 	}
-	return stanGry
+	return stanGry, nil
 }
 
 func koniecGry(stanGry *proto.StanGry) bool {

@@ -63,6 +63,7 @@ func (s *serwer) MojRuch(ctx context.Context, ruch *proto.RuchGracza) (*proto.St
 
 	graczID, err := gra.WykonajRuch(ruch.GraczID, ruch.ZagranaKarta)
 	if err != nil {
+		log.Printf("MojRuch: gra.WykonajRuch: %v", err.Error())
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 

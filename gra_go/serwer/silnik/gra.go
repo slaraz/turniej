@@ -12,9 +12,9 @@ import (
 const (
 	MIN_LICZBA_GRACZY         = 1
 	MAX_LICZBA_GRACZY         = 5
-	DOLACZANIE_GRACZY_TIMEOUT = time.Second * 300
-	RUCH_GRACZA_TIMEOUT       = time.Second * 100
-	WYSLIJ_STATUS_TIMEOUT     = time.Second * 100
+	DOLACZANIE_GRACZY_TIMEOUT = time.Second * 30
+	RUCH_GRACZA_TIMEOUT       = time.Second * 1000
+	WYSLIJ_STATUS_TIMEOUT     = time.Second * 10
 )
 
 type gra struct {
@@ -91,25 +91,29 @@ type odpRuchGracza struct {
 func (g *gra) WykonajRuch(graczID string, zagranaKarta proto.Karta) (string, error) {
 	gracz, ok := g.graczeByID[graczID]
 	if !ok {
-		return "", fmt.Errorf("WykonajRuch: nie ma gracza: %q", graczID)
+		return "", fmt.Errorf("%s WykonajRuch((): nie ma gracza: %q", g.graID, graczID)
 	}
 	kanOdp := make(chan odpRuchGracza)
-	log.Printf("WykonajRuch: gra %s, gracz %q: rząda wykonania ruchu %q\n", g.graID, gracz.nazwaGracza, zagranaKarta)
+	log.Printf("%s WykonajRuch(): %s rząda wykonania ruchu %q\n", g.graID, gracz.nazwaGracza, zagranaKarta)
 	gracz.kanRuch <- reqRuchGracza{
 		karta:  zagranaKarta,
 		kanOdp: kanOdp,
 	}
 	odp := <-kanOdp
-	log.Printf("WykonajRuch: gra %s, gracz %q: wykonano ruchu %q\n", g.graID, gracz.nazwaGracza, zagranaKarta)
+	if odp.err != nil {
+		log.Printf("%s WykonajRuch(): %s wykonał błędny ruch %q: %v\n", g.graID, gracz.nazwaGracza, zagranaKarta, odp.err)
+	} else {
+		log.Printf("%s WykonajRuch(): %s wykonanał ruch %q\n", g.graID, gracz.nazwaGracza, zagranaKarta)
+	}
 	return gracz.graczID, odp.err
 }
 
 func (g *gra) StanGry(graczID string) (*proto.StanGry, error) {
 	gracz, ok := g.graczeByID[graczID]
 	if !ok {
-		return nil, fmt.Errorf("StanGry: nie ma gracza: %q", graczID)
+		return nil, fmt.Errorf("%s StanGry(): nie ma gracza: %q", g.graID, graczID)
 	}
-	log.Printf("StanGry: gra %s, gracz %q: rząda status\n", g.graID, gracz.nazwaGracza)
+	log.Printf("%s StanGry(): %s rząda status\n", g.graID, gracz.nazwaGracza)
 	stan, ok := <-gracz.kanStan
 	// TODO: albo kanał koniec gry
 	if !ok {
@@ -119,12 +123,13 @@ func (g *gra) StanGry(graczID string) (*proto.StanGry, error) {
 	stan.GraczID = graczID
 	stan.TwojKolor = gracz.kolorZolwia
 
-	log.Printf("StanGry: gra %s, gracz %q: wysyłam status: %q\n", g.graID, gracz.nazwaGracza, stan)
+	log.Printf("%s StanGry(): %s dostaje: plansza: %v, karty: %v", g.graID, gracz.nazwaGracza, stan.Plansza, stan.TwojeKarty)
 	return stan, nil
 }
 
 func (g *gra) przebiegRozgrywki() {
 	log.Printf("Rozgrywka1: gra %s: rozpoczęcie rozgrywki\n", g.graID)
+
 	// dołączanie graczy
 	gracze := []*gracz{}
 	timeout := time.After(DOLACZANIE_GRACZY_TIMEOUT)
@@ -173,15 +178,15 @@ func (g *gra) przebiegRozgrywki() {
 	select {
 	case ruszajacyGracz.kanStan <- stan:
 	case <-timeout2:
-		g.koniec(fmt.Errorf("upłynął czas dla gracza: %s", ruszajacyGracz.nazwaGracza))
+		g.koniec(fmt.Errorf("%s upłynął czas dla gracza: %s", g.graID, ruszajacyGracz.nazwaGracza))
 		return
 	}
-	log.Printf("Rozgrywka3: gra %s: wysłano status dla gracza %q\n", g.graID, ruszajacyGracz.nazwaGracza)
+	log.Printf("%s Rozgrywka3: wysłano status dla gracza %q\n", g.graID, ruszajacyGracz.nazwaGracza)
 
 	for {
 		ruszajacyGracz = gracze[i]
 
-		log.Printf("Rozgrywka4: gra %s: ruszający gracz %d %q\n", g.graID, i, ruszajacyGracz.nazwaGracza)
+		log.Printf("%s Rozgrywka4: ruszający gracz %d %q\n", g.graID, i, ruszajacyGracz.nazwaGracza)
 
 		timeout1 := time.After(RUCH_GRACZA_TIMEOUT)
 		select {
@@ -196,11 +201,11 @@ func (g *gra) przebiegRozgrywki() {
 			}
 
 		case <-timeout1:
-			g.koniec(fmt.Errorf("upłynął czas ruchu dla gracza: %s", ruszajacyGracz.nazwaGracza))
+			g.koniec(fmt.Errorf("%s upłynął czas ruchu dla gracza: %s", g.graID, ruszajacyGracz.nazwaGracza))
 			return
 		}
 
-		log.Printf("Rozgrywka5: gra %s: wykonano ruch gracza %q\n", g.graID, ruszajacyGracz.nazwaGracza)
+		log.Printf("%s Rozgrywka5: wykonano ruch gracza %q\n", g.graID, ruszajacyGracz.nazwaGracza)
 
 		i = g.nastepny(i)
 		nastepnyGracz := gracze[i]
@@ -211,15 +216,15 @@ func (g *gra) przebiegRozgrywki() {
 		select {
 		case nastepnyGracz.kanStan <- stan:
 		case <-timeout2:
-			g.koniec(fmt.Errorf("upłynął czas dla gracza: %s", nastepnyGracz.nazwaGracza))
+			g.koniec(fmt.Errorf("%s upłynął czas dla gracza: %s", g.graID, nastepnyGracz.nazwaGracza))
 			return
 		}
-		log.Printf("Rozgrywka6: gra %s: wysłano status dla gracza %d %q\n", g.graID, i, nastepnyGracz.nazwaGracza)
+		log.Printf("%s Rozgrywka6: wysłano status dla gracza %d %q\n", g.graID, i, nastepnyGracz.nazwaGracza)
 	} //for
 }
 
 func (g *gra) koniec(err error) {
-	log.Printf("koniec: gra %s: koniec rozgrywki: %v\n", g.graID, err)
+	log.Printf("%s KONIEC rozgrywki: %v\n", g.graID, err)
 	for _, gracz := range g.graczeByID {
 		close(gracz.kanRuch)
 	}
