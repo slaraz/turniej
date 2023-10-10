@@ -44,7 +44,13 @@ func (game *Game) dealTheCards() {
 		}
 	}
 }
-
+func (game *Game) removePlayerFromGame(playerNumber int) error {
+	if playerNumber > len(game.players) || playerNumber < 0 {
+		return ErrInvalidPlayerNumber
+	}
+	game.players[playerNumber].Color = Default
+	return nil
+}
 func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 	if game.isEnd {
 		return ErrGameIsOver
@@ -89,12 +95,41 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 	}
 
 	player.Cards = append(player.Cards, newCard)
-	game.players[game.playerTurn] = player
-	game.playerTurn = (game.playerTurn) + 1
-	if game.playerTurn >= len(game.players) {
-		game.playerTurn = 0
+	game.players[playerNumber] = player
+	game.playerTurn = game.getPlayerTurn(playerNumber)
+	if game.playerTurn == -1 {
+		return ErrNoPlayers
 	}
+
 	return nil
+}
+
+func (game *Game) getPlayerTurn(currentPlayer int) int {
+	newPlayer := currentPlayer + 1
+	a := 0
+	for checkIfCorrectPlayerNumber(game.players, currentPlayer) {
+		if newPlayer >= len(game.players) {
+			newPlayer = 0
+		}
+		if checkIfCorrectPlayerNumber(game.players, newPlayer) {
+			return newPlayer
+		}
+		newPlayer++
+		if a > 10 { //as if there was no player capable of playing
+			return -1
+		}
+		a++
+	}
+	return -1
+}
+func checkIfCorrectPlayerNumber(players []Player, playerNumber int) bool {
+	if playerNumber > len(players) || playerNumber < 0 {
+		return false
+	}
+	if players[playerNumber].Color == Default {
+		return false
+	}
+	return true
 }
 func findLastOnePawns([]Field) []Color {
 	for _, f := range []Field{} {
