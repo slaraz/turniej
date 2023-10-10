@@ -2,6 +2,7 @@ package silnik
 
 import (
 	"fmt"
+	"log"
 )
 
 type Arena struct {
@@ -99,7 +100,7 @@ func (arena *Arena) arenaFlow() {
 			req.kanOdp <- odp
 
 		case req := <-arena.kanKoniecGry:
-			fmt.Printf("koniec gry %q: %v\n", req.graID, req.err)
+			log.Printf("%s arenaFlow(): usuwam grę: %v", req.graID, req.err)
 			delete(arena.aktywneGry, req.graID)
 		}
 	}

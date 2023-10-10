@@ -1,10 +1,7 @@
 package silnik
 
 import (
-	"log"
 	"math/rand"
-
-	"github.com/slaraz/turniej/gra_go/proto"
 )
 
 // const dozwoloneZnaki = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -45,22 +42,4 @@ func (g *gra) getNowyGraczID() string {
 			return graczID
 		}
 	}
-}
-
-func (g *gra) losujKolorDlaGracza() proto.KolorZolwia {
-	wykorzystaneKolory := map[proto.KolorZolwia]bool{}
-	for _, gracz := range g.graczeByID {
-		wykorzystaneKolory[gracz.kolorZolwia] = true
-	}
-	wolne := []proto.KolorZolwia{}
-	for v := range proto.KolorZolwia_name {
-		kolor := proto.KolorZolwia(v)
-		if _, ok := wykorzystaneKolory[kolor]; !ok {
-			wolne = append(wolne, kolor)
-		}
-	}
-	if len(wolne) == 0 {
-		log.Fatal("nie ma wolnych kolorów")
-	}
-	return wolne[rand.Intn(len(wolne))]
 }

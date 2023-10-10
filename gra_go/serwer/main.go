@@ -45,7 +45,7 @@ func (s *serwer) DolaczDoGry(ctx context.Context, dolacz *proto.Dolaczanie) (*pr
 		return nil, status.Error(codes.ResourceExhausted, err.Error())
 	}
 
-	log.Printf("DolaczDoGry: gracz %q dołączył do gry %q", dolacz.NazwaGracza, dolacz.GraID)
+	log.Printf("%s DolaczDoGry(): dołączył gracz %q", dolacz.GraID, dolacz.NazwaGracza)
 
 	stanGry, err := gra.StanGry(graczID)
 	if err != nil {

@@ -17,7 +17,7 @@ type GameStatus struct {
 	Cards       []Card  `json:"cards"`
 	Winer       int     `json:"winer"`
 	IsEnd       bool    `json:"isEnd"`
-	TurtleColor string  `json:"turtleColor"`
+	TurtleColor Color  `json:"turtleColor"`
 }
 
 // GetGameStatus - return game status for player
@@ -29,7 +29,7 @@ func (game *Game) GetGameStatus(playerNumber int) (*proto.StanGry, error) {
 	status := GameStatus{
 		Board:       game.board,
 		Cards:       game.players[playerNumber-1].Cards,
-		TurtleColor: string(game.players[playerNumber-1].Color),
+		TurtleColor: game.players[playerNumber-1].Color,
 		Winer:       game.winer, //IF WINER IS -1 THEN NO WINER
 		IsEnd:       game.isEnd,
 	}
@@ -41,6 +41,7 @@ func (game *Game) GetGameStatus(playerNumber int) (*proto.StanGry, error) {
 
 func mapGameStatus(status *GameStatus) *proto.StanGry {
 	return &proto.StanGry{
+		TwojKolor: mapKolor(status.TurtleColor),
 		TwojeKarty: mapCards(status.Cards),
 		Plansza:    mapBoard(status.Board),
 		CzyKoniec:  status.IsEnd,
