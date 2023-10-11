@@ -137,16 +137,3 @@ static string Capitalize(string str)
 
     return str.ToUpper(); ;
 }
-
-static T SafeRun<T>(Func<T> action)
-{
-    try
-    {
-        return action();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Wystąpiła błąd: {ex.Message}");
-        throw;
-    }
-}
