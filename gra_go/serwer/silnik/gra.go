@@ -195,6 +195,7 @@ func (g *gra) przebiegRozgrywki() {
 
 		// koniec gry - rozsyłam statusy do pozostałych graczy
 		if stan.CzyKoniec {
+			log.Printf("%s Rozgrywka7: rozsyłam statusy", g.graID)
 			// jeśli koniec gry wysyłamy status do reszty graczy
 			wg := sync.WaitGroup{}
 			for i, gr := range gracze {
@@ -217,30 +218,36 @@ func (g *gra) przebiegRozgrywki() {
 						g.koniec(fmt.Errorf("%s upłynął czas dla gracza: %s", g.graID, ggr.nazwaGracza))
 						return
 					}
-					log.Printf("%s Rozgrywka3: wysłano status dla gracza %q\n", g.graID, ggr.nazwaGracza)
+					log.Printf("%s Rozgrywka8: wysłano status dla gracza %q\n", g.graID, ggr.nazwaGracza)
 				}(i, gr)
 			}
 			wg.Wait()
+			g.koniec(nil)
+			return
 		}
 		log.Printf("%s Rozgrywka4: ruszający gracz %d %q\n", g.graID, i, ruszajacyGracz.nazwaGracza)
 
 		// ruch ---->
 
 		timeout1 := time.After(RUCH_GRACZA_TIMEOUT)
-		select {
-		case req := <-ruszajacyGracz.kanRuch:
+		for {
+			select {
+			case req := <-ruszajacyGracz.kanRuch:
 
-			// LOGIKA GRY
-			err := g.logika.Move(req.ruch.KolorWybrany, req.ruch.ZagranaKarta, i+1)
-			if err != nil {
-				req.kanOdp <- odpRuchGracza{err: err}
-				continue
-			} else {
+				// LOGIKA GRY
+				err := g.logika.Move(req.ruch.KolorWybrany, req.ruch.ZagranaKarta, i+1)
+				if err != nil {
+					log.Printf("%s Rozgrywka9: błąd logika.Move(): %v", g.graID, err)
+					req.kanOdp <- odpRuchGracza{err: err}
+					continue
+				}
 				req.kanOdp <- odpRuchGracza{}
+			case <-timeout1:
+				//TODO: rozesłać status kto wygrał, kto przegrał
+				g.koniec(fmt.Errorf("%s upłynął czas ruchu dla gracza: %s", g.graID, ruszajacyGracz.nazwaGracza))
+				return
 			}
-		case <-timeout1:
-			g.koniec(fmt.Errorf("%s upłynął czas ruchu dla gracza: %s", g.graID, ruszajacyGracz.nazwaGracza))
-			return
+			break
 		}
 		log.Printf("%s Rozgrywka5: wykonano ruch gracza %q\n", g.graID, ruszajacyGracz.nazwaGracza)
 

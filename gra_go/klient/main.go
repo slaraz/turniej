@@ -27,7 +27,7 @@ var (
 	nazwa = flag.String("nazwa", "Ziutek", "nazwa gracza")
 	nowa  = flag.Bool("nowa", false, "tworzy nową grę na serwerze")
 	graID = flag.String("gra", "", "dołącza do gry o podanym id")
-	lg = flag.Int("lg", 2, "określa liczbę graczy")
+	lg    = flag.Int("lg", 2, "określa liczbę graczy")
 )
 
 func main() {
@@ -97,7 +97,7 @@ func main() {
 			}
 
 			// wysyłam ruch do serwera
-			stanGry, err = wyslijRuch(c, &proto.RuchGracza{
+			nowyStan, err := wyslijRuch(c, &proto.RuchGracza{
 				GraID:        stanGry.GraID,
 				GraczID:      stanGry.GraczID,
 				ZagranaKarta: karta,
@@ -112,6 +112,7 @@ func main() {
 				log.Fatalf("wyslijRuch: status: %v, err: %v", status.Code(err), err)
 			}
 			// ruch ok
+			stanGry = nowyStan
 			break
 		}
 	}
