@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	NUMBER_OF_FIELDS_ON_THE_BOARD = 2
+	NUMBER_OF_FIELDS_ON_THE_BOARD = 5
 	MAX_CARD_FOR_PLAYER           = 5
 )
 
@@ -59,10 +59,13 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 	if err := game.checkIfCardAndColorIsValid(c, color, playerNumber); err != nil {
 		return err
 	}
-	if c.typ == LastOne && c.color == Default && color == Default {
+	if c.typ == LastOne && c.color == Default {
 		colors := findLastOnePawns(game.board)
-		if len(colors) != 1 {
+		if len(colors) != 1 && color == Default {
 			return ErrPickTheColor
+		}
+		if !checkIdColorValidDoDL(colors, color) {
+			return ErrInvalidColor
 		}
 		c.color = Colors[0]
 	}
@@ -131,8 +134,8 @@ func checkIfCorrectPlayerNumber(players []Player, playerNumber int) bool {
 	}
 	return true
 }
-func findLastOnePawns([]Field) []Color {
-	for _, f := range []Field{} {
+func findLastOnePawns(fields []Field) []Color {
+	for _, f := range fields {
 		if len(f.Pawns) > 0 {
 			return f.Pawns
 		}
@@ -204,4 +207,13 @@ func shuffleColorsd(colors []Color) []Color {
 		colors[r] = c
 	}
 	return colors
+}
+
+func checkIdColorValidDoDL(colors []Color, color Color) bool {
+	for _, c := range colors {
+		if c == color {
+			return true
+		}
+	}
+	return false
 }

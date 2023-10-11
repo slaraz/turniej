@@ -133,17 +133,23 @@ func wczytajKolor() proto.KolorZolwia {
 }
 
 func wczytajKarte() proto.Karta {
-	fmt.Print("Wybierz kartę do zagrania:\n> ")
-	var karta string
-	_, err := fmt.Scanln(&karta)
-	if err != nil {
-		log.Fatalf("Błąd wczytywania karty: %v", err)
+	var karta proto.Karta
+	for {
+		fmt.Print("Wybierz kartę do zagrania:\n> ")
+		var kartatxt string
+		_, err := fmt.Scanln(&kartatxt)
+		if err != nil {
+			log.Fatalf("Błąd wczytywania karty: %v", err)
+		}
+		k, ok := proto.Karta_value[strings.ToUpper(kartatxt)]
+		if !ok {
+			fmt.Printf("Niepoprawna karta: %q\n", kartatxt)
+			continue
+		}
+		karta = proto.Karta(k)
+		break
 	}
-	k, ok := proto.Karta_value[strings.ToUpper(karta)]
-	if !ok {
-		log.Fatalf("Niepoprawna karta: %q", karta)
-	}
-	return proto.Karta(k)
+	return karta
 }
 
 func dolaczDoGry(c proto.GraClient, graID, nazwa string) *proto.StanGry {
