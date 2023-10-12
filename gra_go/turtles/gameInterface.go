@@ -18,6 +18,7 @@ type GameStatus struct {
 	Winer       int     `json:"winer"`
 	IsEnd       bool    `json:"isEnd"`
 	TurtleColor Color   `json:"turtleColor"`
+	UsedCards   []Card  `json:"usedCards"`
 }
 
 // GetGameStatus - return game status for player
@@ -32,6 +33,7 @@ func (game *Game) GetGameStatus(playerNumber int) (*proto.StanGry, error) {
 		TurtleColor: game.players[playerNumber-1].Color,
 		Winer:       game.winer, //IF WINER IS -1 THEN NO WINER
 		IsEnd:       game.isEnd,
+		UsedCards:   game.UsedCards,
 	}
 	log.Printf("-----> GetGameStatus: playerNumber: %d, status: %+v", playerNumber, status)
 	stat := mapGameStatus(&status)

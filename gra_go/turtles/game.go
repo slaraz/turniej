@@ -19,6 +19,7 @@ type Game struct {
 	playerTurn int
 	isEnd      bool
 	winer      int
+	UsedCards  []Card
 }
 
 func (game *Game) GetBoard() []Field {
@@ -89,6 +90,7 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 		return err
 	}
 	game.usedDeck = append(game.usedDeck, c)
+	game.UsedCards = append(game.UsedCards, c)
 	if len(game.deck) == 0 {
 		game.deck = game.usedDeck
 		game.usedDeck = Deck{}
