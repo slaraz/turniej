@@ -125,6 +125,10 @@ func logZagraneKarty(zagraneKarty []*proto.ZagranaKarta, l *logGry) []logZagrana
 }
 
 func (l *logGry) dodajKoniec(stan *proto.StanGry) {
+	if stan.KtoWygral == -1 {
+		l.WynikGry.WygranyGracz = "remis"
+		return
+	}
 	l.WynikGry.WygranyGracz = l.mapaNumerGracz[int(stan.KtoWygral)].nazwaGracza
 }
 
