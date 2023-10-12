@@ -66,12 +66,15 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 		return err
 	}
 	col := c.color
-	if c.typ == LastOne && c.color == Default && color == Default {
+	if c.typ == LastOne && c.color == Default {
 		colors := findLastOnePawns(game.board)
-		if len(colors) != 1 {
+		if len(colors) != 1 && color == Default {
 			return ErrPickTheColor
 		}
-		col = colors[0]
+		if !checkIdColorValidDoDL(colors, color) {
+			return ErrInvalidColor
+		}
+		col = Colors[0]
 	}
 
 	if col == Default {
@@ -130,6 +133,7 @@ func (game *Game) getPlayerTurn(currentPlayer int) int {
 	}
 	return -1
 }
+
 func checkIfCorrectPlayerNumber(players []Player, playerNumber int) bool {
 	if playerNumber > len(players) || playerNumber < 0 {
 		return false
@@ -139,8 +143,8 @@ func checkIfCorrectPlayerNumber(players []Player, playerNumber int) bool {
 	}
 	return true
 }
-func findLastOnePawns([]Field) []Color {
-	for _, f := range []Field{} {
+func findLastOnePawns(fields []Field) []Color {
+	for _, f := range fields {
 		if len(f.Pawns) > 0 {
 			return f.Pawns
 		}
@@ -229,4 +233,13 @@ func shuffleColors(colors []Color) []Color {
 		colors[r] = c
 	}
 	return colors
+}
+
+func checkIdColorValidDoDL(colors []Color, color Color) bool {
+	for _, c := range colors {
+		if c == color {
+			return true
+		}
+	}
+	return false
 }
