@@ -7,6 +7,14 @@ const graMessages = require(`./gra_pb.js`);
 const graServices = require(`./gra_grpc_pb.js`);
 const readline = require('readline');
 
+const KARTY_KTORE_WYMAGAJA_KOLORU =
+{
+  'L1': true,
+  'L2': true,
+  'A1': true,
+  'A1B': true
+};
+
 const rlInterface = readline.createInterface({ input: process.stdin, output: process.stdout });
 const rlIterator = rlInterface[Symbol.asyncIterator]();
 
@@ -31,6 +39,8 @@ async function main() {
   let stanGry;
   let karta;
 
+  console.log(''); //new line
+
   try {
 
     if (!graId) {
@@ -39,28 +49,54 @@ async function main() {
 
     console.log(`Twój Id gry to: ${graId}`);
     console.log(`Twoje imię to: ${nazwaGracza}`);
-    console.log(`GLHF GLHF GLHF GLHF`);
+
+    console.log(''); //new line
+    console.log('GLHF GLHF GLHF GLHF', '\n');
 
     stanGry = await dolaczDoGry(klient, graId, nazwaGracza);
 
     while (true) {
 
       wyplujStanGry(stanGry);
+
+      if (stanGry.getCzykoniec()) {
+        console.log('GG', '\n');
+        break;
+      }
+
+      let idKarty, idKoloru;
+
+      // * ZAMIAST WCZYTYWANIA DO YOUR MAGIC, TWOJE KARTY, PLANSZE MACIE W STANIE GRY !!!
+      // * JAK DOBRAC SIE DO STANU GRY MACIE W METODCE WYPLUJ STAN GRY
+      // * ------------------------------------------------------------------------------
       
       console.log('Którą kartą chcesz zagrać?');
-      let kartaInput = await rlIterator.next();
-      let karta = kartaInput.value;
+      let kodKartyInput = await rlIterator.next();
+      const kodKarty = kodKartyInput.value;
+      idKarty = konwertujKodKartyNaIdka(kodKarty);
 
-      await ruchGracza(klient, stanGry, { numer: karta, kolor: 1 });
+      console.log(''); //new line
+
+      if (KARTY_KTORE_WYMAGAJA_KOLORU[kodKarty]) {
+        console.log('Podaj kolor żółwia: RED, GREEN, BLUE, YELLOW, PURPLE');
+        let kolorZolwiaInput = await rlIterator.next();
+        const kolorZolwia = kolorZolwiaInput.value;
+        idKoloru = konwertujKolorZolwiaNaIdka(kolorZolwia)
+        console.log(''); //new line
+      }
+
+      // * ------------------------------------------------------------------------------
+      // * ------------------------------------------------------------------------------
+      // * ------------------------------------------------------------------------------
+
+      stanGry = await mojRuch(klient, stanGry, idKarty, idKoloru);
     }
 
   } catch (ex) {
     console.log(ex);
-    console.log('To by było na tyle :(')
+    console.log('To by było na tyle :(', '\n', '\n');
     return;
   }
-
-  console.log(graId);
 }
 
 async function nowyMecz(klient, liczbaGraczy) {
@@ -108,12 +144,12 @@ async function dolaczDoGry(klient, graId, nazwaGracza) {
   });
 }
 
-async function ruchGracza(klient, stanGry, karta) {
+async function mojRuch(klient, stanGry, idKarty, idKoloru) {
   ruchGracza = new graMessages.RuchGracza();
   ruchGracza.setGraid(stanGry.getGraid());
   ruchGracza.setGraczid(stanGry.getGraczid());
-  ruchGracza.setZagranakarta(karta.numer);
-  ruchGracza.setKolorwybrany(karta.kolor);
+  ruchGracza.setZagranakarta(idKarty);
+  ruchGracza.setKolorwybrany(idKoloru);
 
   return ruchGraczaPromise = new Promise((resolve, reject) => {
     klient.mojRuch(ruchGracza, (err, res) => {
@@ -137,14 +173,44 @@ function wyplujStanGry(stanGry) {
   if (stanGry.getCzykoniec()) {
     console.log(`Koniec gry, wygrał gracz nr: ${stanGry.getKtowygral()}`)
   } else {
-    console.log(`Twój kolor: ${stanGry.getTwojkolor()}`)
-    console.log(`Twoje karty: ${stanGry.getTwojekartyList().join(', ')}`)
-    // fmt.Printf("Twój kolor: %v, Pola:", stanGry.TwojKolor)
-    // for _, pole := range stanGry.Plansza {
-    //   fmt.Printf(" %v", pole.Zolwie)
-    // }
-    // fmt.Printf(", Twoje karty: %v\n", stanGry.TwojeKarty)
+    const kolorZolwia = dajMiKolorZolwia(stanGry.getTwojkolor());
+    const kartyZKodem = stanGry
+      .getTwojekartyList()
+      .map(k => dajMiKodKarty(k))
+      .join(', ');
+
+    console.log(`Kolor żółwia: ${kolorZolwia}`)
+    console.log(`Twoje karty: ${kartyZKodem}`)
+
+    const plansza = stanGry.getPlanszaList();
+    let sytuacjaNaPlanszy = 'Plansza: ';
+
+    plansza.forEach((pole) => {
+      const zolwieNaPolu = pole.getZolwieList();
+      const zolwieNaPoluPoPrzecinku = zolwieNaPolu
+        .map(z => dajMiKolorZolwia(z))
+        .join(', ')
+        .toUpperCase();
+
+      sytuacjaNaPlanszy += `[${zolwieNaPoluPoPrzecinku}] `;
+    });
+
+    console.log(sytuacjaNaPlanszy, '\n');
   }
 }
 
+function dajMiKolorZolwia(idKoloru) {
+  return Object.keys(graMessages.KolorZolwia).find(key => graMessages.KolorZolwia[key] === idKoloru);
+}
 
+function konwertujKolorZolwiaNaIdka(kolorZolwia) {
+  return graMessages.KolorZolwia[kolorZolwia];
+}
+
+function dajMiKodKarty(idKoloru) {
+  return Object.keys(graMessages.Karta).find(key => graMessages.Karta[key] === idKoloru);
+}
+
+function konwertujKodKartyNaIdka(kodKarty) {
+  return graMessages.Karta[kodKarty];
+}
