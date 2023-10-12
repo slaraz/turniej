@@ -43,13 +43,26 @@ func (game *Game) GetGameStatus(playerNumber int) (*proto.StanGry, error) {
 
 func mapGameStatus(status *GameStatus) *proto.StanGry {
 	return &proto.StanGry{
-		TwojKolor:  mapKolor(status.TurtleColor),
-		TwojeKarty: mapCards(status.Cards),
-		Plansza:    mapBoard(status.Board),
-		CzyKoniec:  status.IsEnd,
-		KtoWygral:  int32(status.Winer),
+		TwojKolor:    mapKolor(status.TurtleColor),
+		TwojeKarty:   mapCards(status.Cards),
+		Plansza:      mapBoard(status.Board),
+		CzyKoniec:    status.IsEnd,
+		KtoWygral:    int32(status.Winer),
+		ZagraneKarty: mapZagrane(status.UsedCards),
 	}
 }
+
+func mapZagrane(usedCards []UsedCard) []*proto.ZagranaKarta {
+	zagrane := []*proto.ZagranaKarta{}
+	for _, c := range usedCards {
+		zagrane = append(zagrane, &proto.ZagranaKarta{
+			NumerGracza: int32(c.Player),
+			Karta:       proto.Karta(proto.Karta_value[c.CardSymbol]),
+		})
+	}
+	return zagrane
+}
+
 func mapCards(cards []Card) []proto.Karta {
 	karty := []proto.Karta{}
 	for _, c := range cards {

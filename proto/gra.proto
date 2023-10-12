@@ -35,6 +35,12 @@ message StanGry {
     bool CzyKoniec = 6;
     int32 KtoWygral = 7;
     string nazwaZwyciezcy = 8;
+    repeated ZagranaKarta zagraneKarty = 9;
+}
+
+message ZagranaKarta {
+    int32 numerGracza = 1;
+    Karta karta = 2;  
 }
 
 message Pole {
@@ -58,7 +64,7 @@ message RuchGracza {
 }
 
 enum Karta {
-    XX = 0; // czerwony jeden do przodu
+    XX = 0; // piersza karta z opakowania tali, nie używana w grze
     R1 = 1; // czerwony jeden do przodu
     R2 = 2; // czerwony dwa do przodu
     R1B = 3; //czerwony jeden do tyłu

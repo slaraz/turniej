@@ -82,7 +82,7 @@ func (l *logGry) dodajStan(stan *proto.StanGry) {
 		TwojKolor:    stan.TwojKolor.String(),
 		Plansza:      logPola(stan.Plansza),
 		TwojeKarty:   logKarty(stan.TwojeKarty),
-		ZagraneKatry: logZagraneKarty( /*TODO: stan.ZagraneKarty*/ ),
+		ZagraneKatry: logZagraneKarty(stan.ZagraneKarty, l),
 	}
 	l.PrzebiegGry = append(l.PrzebiegGry, ls)
 }
@@ -112,8 +112,16 @@ func logKarty(karty []proto.Karta) []string {
 	return kartytxt
 }
 
-func logZagraneKarty() []logZagranaKarta {
-	return []logZagranaKarta{}
+func logZagraneKarty(zagraneKarty []*proto.ZagranaKarta, l *logGry) []logZagranaKarta {
+	zagrane := []logZagranaKarta{}
+	for _, zg := range zagraneKarty {
+		zagrana := logZagranaKarta{
+			NazwaGracza:  l.mapaNumerGracz[int(zg.NumerGracza)].nazwaGracza,
+			ZagranaKarta: zg.Karta.String(),
+		}
+		zagrane = append(zagrane, zagrana)
+	}
+	return zagrane
 }
 
 func (l *logGry) dodajKoniec(stan *proto.StanGry) {
