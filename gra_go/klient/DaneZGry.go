@@ -30,7 +30,7 @@ func znajdzZolwieNadNami(naszePole int, naszKolor proto.KolorZolwia, plansza []*
 		}
 	}
 
-	return plansza[naszePole].GetZolwie()[indeksNaszegoZolwia:]
+	return plansza[naszePole].GetZolwie()[indeksNaszegoZolwia + 1:]
 }
 
 func znajdzZolwiePodNami(naszePole int, naszKolor proto.KolorZolwia, plansza []*proto.Pole) []proto.KolorZolwia {

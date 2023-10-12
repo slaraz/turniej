@@ -94,7 +94,7 @@ func TestNaszePole(t *testing.T) {
 			name: "pusta plansza",
 			args: args{
 				naszKolor: proto.KolorZolwia_GREEN,
-				plansza: make([]*proto.Pole, 10),
+				plansza:   make([]*proto.Pole, 10),
 			},
 			want: -1,
 		},
@@ -175,6 +175,97 @@ func TestNaszePole(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := naszePole(tt.args.naszKolor, tt.args.plansza); got != tt.want {
 				t.Errorf("naszePole() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestZnajdzZolwieNadNami(t *testing.T) {
+	type args struct {
+		naszePole int
+		naszKolor proto.KolorZolwia
+		plansza   []*proto.Pole
+	}
+	tests := []struct {
+		name string
+		args args
+		want []proto.KolorZolwia
+	}{
+		{
+			name: "brak nad nami, brak pod nami",
+			args: args{
+				naszePole: 0,
+				naszKolor: proto.KolorZolwia_GREEN,
+				plansza: []*proto.Pole{
+					{
+						Zolwie: []proto.KolorZolwia{
+							proto.KolorZolwia_GREEN,
+						},
+					},
+				},
+			},
+			want: []proto.KolorZolwia{},
+		},
+		{
+			name: "brak nad nami, niebieski pod nami",
+			args: args{
+				naszePole: 0,
+				naszKolor: proto.KolorZolwia_GREEN,
+				plansza: []*proto.Pole{
+					{
+						Zolwie: []proto.KolorZolwia{
+							proto.KolorZolwia_BLUE,
+							proto.KolorZolwia_GREEN,
+						},
+					},
+				},
+			},
+			want: []proto.KolorZolwia{},
+		},
+		{
+			name: "niebieski nad nami, brak pod nami",
+			args: args{
+				naszePole: 0,
+				naszKolor: proto.KolorZolwia_GREEN,
+				plansza: []*proto.Pole{
+					{
+						Zolwie: []proto.KolorZolwia{
+							proto.KolorZolwia_GREEN,
+							proto.KolorZolwia_BLUE,
+						},
+					},
+				},
+			},
+			want: []proto.KolorZolwia{
+				proto.KolorZolwia_BLUE,
+			},
+		},
+		{
+			name: "jeden pod nami, dwa nad nami",
+			args: args{
+				naszePole: 0,
+				naszKolor: proto.KolorZolwia_GREEN,
+				plansza: []*proto.Pole{
+				  {
+						Zolwie: []proto.KolorZolwia{
+							proto.KolorZolwia_BLUE,
+							proto.KolorZolwia_GREEN,
+							proto.KolorZolwia_PURPLE,
+							proto.KolorZolwia_YELLOW,
+						},
+					},
+				},
+			},
+			want: []proto.KolorZolwia{
+				proto.KolorZolwia_PURPLE,
+				proto.KolorZolwia_YELLOW,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := znajdzZolwieNadNami(tt.args.naszePole, tt.args.naszKolor, tt.args.plansza); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("znajdzZolwieNadNami() = %v, want %v", got, tt.want)
 			}
 		})
 	}
