@@ -27,6 +27,8 @@ type gra struct {
 
 	kanDolaczGracza   chan reqDolaczGracza
 	kanArenaKoniecGry chan reqKoniecGry
+
+	logGry *logGry
 }
 
 type gracz struct {
@@ -34,6 +36,8 @@ type gracz struct {
 	nazwaGracza string
 	kanRuch     chan reqRuchGracza
 	kanStan     chan *proto.StanGry
+	kolorGracza proto.KolorZolwia
+	numerGracza int
 }
 
 func nowaGra(graID string, liczbaGraczy int, kanKoniecGry chan reqKoniecGry) (*gra, error) {
@@ -53,6 +57,7 @@ func nowaGra(graID string, liczbaGraczy int, kanKoniecGry chan reqKoniecGry) (*g
 		logika:            getLogikaGry(liczbaGraczy),
 		kanDolaczGracza:   make(chan reqDolaczGracza),
 		kanArenaKoniecGry: kanKoniecGry,
+		logGry:            nowyLog(graID),
 	}
 	log.Printf("%s nowaGra(): utworzono grę dla %d graczy\n", g.graID, g.liczbaGraczy)
 	// uruchomienie wątku gry
@@ -116,7 +121,6 @@ func (g *gra) StanGry(graczID string) (*proto.StanGry, error) {
 	}
 	log.Printf("%s StanGry(): %s rząda status\n", g.graID, gracz.nazwaGracza)
 	stan, ok := <-gracz.kanStan
-	// TODO: albo kanał koniec gry
 	if !ok {
 		return nil, fmt.Errorf("gracz status !ok")
 	}
@@ -177,8 +181,13 @@ func (g *gra) przebiegRozgrywki() {
 	kolejnosc := ""
 	for i, gracz := range gracze {
 		kolejnosc += fmt.Sprintf(" %d. %q", i+1, gracz.nazwaGracza)
+		// pobieramy kolor gracza
+		stan, _ := g.logika.GetGameStatus(i + 1)
+		gracz.kolorGracza = stan.TwojKolor
+		gracz.numerGracza = i + 1
 	}
 	log.Printf("%s Rozgrywka2: kolejność graczy: %s", g.graID, kolejnosc)
+	g.logGry.dodajGraczy(gracze)
 
 	// wykonywanie ruchów
 	i := 0
@@ -189,6 +198,7 @@ func (g *gra) przebiegRozgrywki() {
 
 		// LOGIKA GRY
 		stan, _ := g.logika.GetGameStatus(i + 1)
+		g.logGry.dodajStan(stan)
 		// wysyłamy status do gracza
 		timeout2 := time.After(WYSLIJ_STATUS_TIMEOUT)
 		select {
@@ -218,10 +228,7 @@ func (g *gra) przebiegRozgrywki() {
 					select {
 					case ggr.kanStan <- stan:
 					case <-timeout2:
-
-						// TODO: tu dalej pisać jak sobie pójdziesz
-
-						g.koniec(fmt.Errorf("%s upłynął czas dla gracza: %s", g.graID, ggr.nazwaGracza))
+						log.Printf("%s Rozgrywka8x: NIE wysłano status dla gracza %q, timeout\n", g.graID, ggr.nazwaGracza)
 						return
 					}
 					log.Printf("%s Rozgrywka8: wysłano status dla gracza %q\n", g.graID, ggr.nazwaGracza)
@@ -229,6 +236,7 @@ func (g *gra) przebiegRozgrywki() {
 			}
 			wg.Wait()
 			g.koniec(nil)
+			g.logGry.dodajKoniec(stan)
 			return
 		}
 		log.Printf("%s Rozgrywka4: ruszający gracz %d %q\n", g.graID, i, ruszajacyGracz.nazwaGracza)

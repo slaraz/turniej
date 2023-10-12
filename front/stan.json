@@ -3,12 +3,12 @@
         "graID": "OUGIYGBUI",
         "gracze": [
             {
-                "numerGracza": "1",
+                "numerGracza": 1,
                 "nazwaGracza": "Lewy",
                 "kolorGracza": "RED"
             },
             {
-                "numerGracza": "2",
+                "numerGracza": 2,
                 "nazwaGracza": "Prawy",
                 "kolorGracza": "BLUE"
             }
@@ -16,7 +16,6 @@
     },
     "przebiegGry": [
         {
-            "graID": "PN",
             "nazwaGracza": "Lewy",
             "twojKolor": "RED",
             "twojeKarty": [

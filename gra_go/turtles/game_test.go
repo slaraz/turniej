@@ -87,7 +87,7 @@ func Test_shuffleColorsd(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := shuffleColorsd(tt.args.colors); reflect.DeepEqual(got, tt.want) {
+			if got := shuffleColors(tt.args.colors); reflect.DeepEqual(got, tt.want) {
 				t.Errorf("not shuffling() = %v, want diffrent %v", got, tt.want)
 			}
 		})
