@@ -101,7 +101,7 @@ func (g *gra) WykonajRuch(graczID string, ruch *proto.RuchGracza) (string, error
 		return "", fmt.Errorf("%s WykonajRuch((): nie ma gracza: %q", g.graID, graczID)
 	}
 	kanOdp := make(chan odpRuchGracza)
-	log.Printf("%s WykonajRuch(): %s rząda wykonania ruchu %q %q\n", g.graID, gracz.nazwaGracza, ruch.ZagranaKarta, ruch.KolorWybrany)
+	log.Printf("%s WykonajRuch(): %s żąda wykonania ruchu %q %q\n", g.graID, gracz.nazwaGracza, ruch.ZagranaKarta, ruch.KolorWybrany)
 	gracz.kanRuch <- reqRuchGracza{
 		ruch:   ruch,
 		kanOdp: kanOdp,
@@ -120,7 +120,7 @@ func (g *gra) StanGry(graczID string) (*proto.StanGry, error) {
 	if !ok {
 		return nil, fmt.Errorf("%s StanGry(): nie ma gracza: %q", g.graID, graczID)
 	}
-	log.Printf("%s StanGry(): %s rząda status\n", g.graID, gracz.nazwaGracza)
+	log.Printf("%s StanGry(): %s żąda status\n", g.graID, gracz.nazwaGracza)
 	stan, ok := <-gracz.kanStan
 	if !ok {
 		return nil, fmt.Errorf("gracz status !ok")
