@@ -30,15 +30,6 @@ var (
 	lg    = flag.Int("lg", 2, "określa liczbę graczy")
 )
 
-type Dane struct {
-	OstatnieZolwie []proto.KolorZolwia
-	ZolwieNadNami []proto.KolorZolwia
-	ZolwiePodNami []proto.KolorZolwia
-	IleKrokowDoKonca int
-	DomniemanyPrzeciwnik proto.KolorZolwia // gdy 1v1
-	NaszePole int
-}
-
 func main() {
 	fmt.Println("Start")
 	defer fmt.Println("Koniec.")
@@ -86,6 +77,7 @@ func main() {
 	)
 
 	// przebieg gry
+	var daneZGry DaneZGry
 
 	// dołączamy do gry graID
 	stanGry := dolaczDoGry(c, *graID, *nazwa)
@@ -96,8 +88,7 @@ func main() {
 			return
 		}
 
-		ostatnieZolwie := pobierzOstatnieZolwie(stanGry)
-
+		daneZGry.PobierzDaneZeStanuGry(stanGry)
 		for {
 			// gracz podaje kartę na konsoli
 			// karta = wczytajKarte()
@@ -130,6 +121,11 @@ func main() {
 			break
 		}
 	}
+}
+
+func wyciagnijDaneZGry(stanGry *proto.StanGry) DaneZGry {
+
+	panic("unimplemented")
 }
 
 func randomowyKolor() proto.KolorZolwia {
