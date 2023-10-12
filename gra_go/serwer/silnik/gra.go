@@ -1,6 +1,7 @@
 package silnik
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
@@ -123,9 +124,14 @@ func (g *gra) StanGry(graczID string) (*proto.StanGry, error) {
 	stan.GraczID = graczID
 
 	log.Printf("%s StanGry(): %s dostaje: plansza: %v, karty: %v", g.graID, gracz.nazwaGracza, stan.Plansza, stan.TwojeKarty)
+	drukujStan(stan)
 	return stan, nil
 }
 
+func drukujStan(stan *proto.StanGry) {
+	stanJSON, _ := json.Marshal(stan)
+	log.Printf("stan: %s", stanJSON)
+}
 func (g *gra) przebiegRozgrywki() {
 	log.Printf("%s Rozgrywka0: rozpoczęcie rozgrywki\n", g.graID)
 
