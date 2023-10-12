@@ -14,8 +14,8 @@ import (
 const (
 	MIN_LICZBA_GRACZY         = 1
 	MAX_LICZBA_GRACZY         = 5
-	DOLACZANIE_GRACZY_TIMEOUT = time.Second * 30
-	RUCH_GRACZA_TIMEOUT       = time.Second * 1000
+	DOLACZANIE_GRACZY_TIMEOUT = time.Second * 100
+	RUCH_GRACZA_TIMEOUT       = time.Second * 10
 	WYSLIJ_STATUS_TIMEOUT     = time.Second * 10
 )
 
