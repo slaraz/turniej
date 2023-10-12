@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+type UsedCard struct {
+	CardSymbol string `json:"cardSymbol"`
+	Player     int    `json:"player"`
+}
+
 const (
 	NUMBER_OF_FIELDS_ON_THE_BOARD = 2
 	MAX_CARD_FOR_PLAYER           = 5
@@ -19,7 +24,7 @@ type Game struct {
 	playerTurn int
 	isEnd      bool
 	winer      int
-	UsedCards  []Card
+	UsedCards  []UsedCard
 }
 
 func (game *Game) GetBoard() []Field {
@@ -90,7 +95,7 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 		return err
 	}
 	game.usedDeck = append(game.usedDeck, c)
-	game.UsedCards = append(game.UsedCards, c)
+	game.UsedCards = append(game.UsedCards, UsedCard{CardSymbol: string(c.Symbol), Player: playerNumber})
 	if len(game.deck) == 0 {
 		game.deck = game.usedDeck
 		game.usedDeck = Deck{}
