@@ -34,6 +34,7 @@ message StanGry {
     repeated Pole plansza = 5;
     bool CzyKoniec = 6;
     int32 KtoWygral = 7;
+    string nazwaZwyciezcy = 8;
 }
 
 message Pole {

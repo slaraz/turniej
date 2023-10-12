@@ -14,4 +14,7 @@ public class Options
     
     [Option('g', "gra", Required = true, HelpText = "dołącza do gry o podanej nazwie", SetName = "tryb2")]
     public string GraId { get; set; }
+
+    [Option('l', "lg", Required = false, HelpText = "określa liczbę graczy")]
+    public int LiczbaGraczy { get; set; } = 2;
 }

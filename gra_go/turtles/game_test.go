@@ -43,6 +43,15 @@ func Test_findWinner(t *testing.T) {
 			want:  Player{Color: "blue"},
 			want1: 2,
 		},
+		{
+			name: "blue Wins",
+			args: args{
+				board:   []Field{{}, {}, {}, {Pawns: []Color{"red"}}, {Pawns: []Color{"yellow", "blue"}}},
+				players: []Player{{Color: "yellow"}, {Color: "blue"}},
+			},
+			want:  Player{Color: "blue"},
+			want1: 2,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

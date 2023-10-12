@@ -20,27 +20,63 @@ message KonfiguracjaGry {
 
 message NowaGraInfo {
     string graID = 1;
-    string opis = 2;
-}
-
-message WizytowkaGracza {
-    string nazwa = 1;
 }
 
 message Dolaczanie {
     string graID = 1;
-    WizytowkaGracza wizytowka = 2;
+    string nazwaGracza = 2;
 }
 
 message StanGry {
     string graID = 1; 
     string graczID = 2;
-    string sytuacjaNaPlanszy = 3;
-    string twojeKarty = 4;
+    KolorZolwia twojKolor = 3;
+    repeated Karta twojeKarty = 4;
+    repeated Pole plansza = 5;
+    bool CzyKoniec = 6;
+    int32 KtoWygral = 7;
+    string nazwaZwyciezcy = 8;
+}
+
+message Pole {
+    repeated KolorZolwia zolwie = 2;
+}
+
+enum KolorZolwia {
+    XXX = 0;
+    RED = 1;
+    GREEN = 2;
+    BLUE = 3;
+    YELLOW = 4;
+    PURPLE = 5;
 }
 
 message RuchGracza {
     string graID = 1; 
     string graczID = 2;
-    string zagranaKarta = 3;
+    Karta zagranaKarta = 3;
+    KolorZolwia kolorWybrany = 4;
+}
+
+enum Karta {
+    XX = 0; // czerwony jeden do przodu
+    R1 = 1; // czerwony jeden do przodu
+    R2 = 2; // czerwony dwa do przodu
+    R1B = 3; //czerwony jeden do tyłu
+    G1 = 4; // zielony
+    G2 = 5;
+    G1B = 6;
+    B1 = 7; // niebieski
+    B2 = 8;
+    B1B = 9;
+    Y1 = 10; // żółty
+    Y2 = 11;
+    Y1B = 12;
+    P1 = 13; // fioletowy
+    P2 = 14;
+    P1B = 15;
+    L1 = 16; // ostatni
+    L2 = 17;
+    A1 = 18; // dowolny
+    A1B = 19;
 }

@@ -5,8 +5,13 @@ import (
 	"time"
 )
 
+type UsedCard struct {
+	CardSymbol string `json:"cardSymbol"`
+	Player     int    `json:"player"`
+}
+
 const (
-	NUMBER_OF_FIELDS_ON_THE_BOARD = 2
+	NUMBER_OF_FIELDS_ON_THE_BOARD = 10
 	MAX_CARD_FOR_PLAYER           = 5
 )
 
@@ -19,6 +24,7 @@ type Game struct {
 	playerTurn int
 	isEnd      bool
 	winer      int
+	UsedCards  []UsedCard
 }
 
 func (game *Game) GetBoard() []Field {
@@ -30,7 +36,7 @@ func (game *Game) GetPlayerTurn() int {
 
 func generatePlayers(numberOfPlayers int) []Player {
 	players := make([]Player, numberOfPlayers)
-	colors := shuffleColorsd(Colors)
+	colors := shuffleColors(Colors)
 	for i := 0; i < numberOfPlayers; i++ {
 		players[i] = Player{Color: colors[i]}
 	}
@@ -44,7 +50,13 @@ func (game *Game) dealTheCards() {
 		}
 	}
 }
-
+func (game *Game) removePlayerFromGame(playerNumber int) error {
+	if playerNumber > len(game.players) || playerNumber < 0 {
+		return ErrInvalidPlayerNumber
+	}
+	game.players[playerNumber].Color = Default
+	return nil
+}
 func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 	if game.isEnd {
 		return ErrGameIsOver
@@ -53,15 +65,16 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 	if err := game.checkIfCardAndColorIsValid(c, color, playerNumber); err != nil {
 		return err
 	}
+	col := c.color
 	if c.typ == LastOne && c.color == Default && color == Default {
 		colors := findLastOnePawns(game.board)
 		if len(colors) != 1 {
 			return ErrPickTheColor
 		}
-		c.color = Colors[0]
+		col = colors[0]
 	}
-	col := c.color
-	if c.color == Default {
+
+	if col == Default {
 		col = color
 	}
 	b, err := MovePawn(game.board, col, c.move)
@@ -83,18 +96,48 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 		return err
 	}
 	game.usedDeck = append(game.usedDeck, c)
+	game.UsedCards = append(game.UsedCards, UsedCard{CardSymbol: string(c.Symbol), Player: playerNumber})
 	if len(game.deck) == 0 {
 		game.deck = game.usedDeck
 		game.usedDeck = Deck{}
 	}
 
 	player.Cards = append(player.Cards, newCard)
-	game.players[game.playerTurn] = player
-	game.playerTurn = (game.playerTurn) + 1
-	if game.playerTurn >= len(game.players) {
-		game.playerTurn = 0
+	game.players[playerNumber] = player
+	game.playerTurn = game.getPlayerTurn(playerNumber)
+	if game.playerTurn == -1 {
+		return ErrNoPlayers
 	}
+
 	return nil
+}
+
+func (game *Game) getPlayerTurn(currentPlayer int) int {
+	newPlayer := currentPlayer + 1
+	a := 0
+	for checkIfCorrectPlayerNumber(game.players, currentPlayer) {
+		if newPlayer >= len(game.players) {
+			newPlayer = 0
+		}
+		if checkIfCorrectPlayerNumber(game.players, newPlayer) {
+			return newPlayer
+		}
+		newPlayer++
+		if a > 10 { //as if there was no player capable of playing
+			return -1
+		}
+		a++
+	}
+	return -1
+}
+func checkIfCorrectPlayerNumber(players []Player, playerNumber int) bool {
+	if playerNumber > len(players) || playerNumber < 0 {
+		return false
+	}
+	if players[playerNumber].Color == Default {
+		return false
+	}
+	return true
 }
 func findLastOnePawns([]Field) []Color {
 	for _, f := range []Field{} {
@@ -121,7 +164,24 @@ func (game *Game) checkIfCardAndColorIsValid(card Card, color Color, playerNumbe
 		}
 		return ErrInvalidCard
 	}
+	co := card.color
+	if card.color == Default {
+		co = color
+	}
+	if !checkIfTurtleIsOnTheBoard(game.board, co) && card.move < 0 {
+		return ErrInvalidCard
+	}
 	return nil
+}
+func checkIfTurtleIsOnTheBoard(board []Field, color Color) bool {
+	for _, f := range board {
+		for _, c := range f.Pawns {
+			if c == color {
+				return true
+			}
+		}
+	}
+	return false
 }
 func findCard(symbol Symbol) (Card, error) {
 	for _, card := range DefaultDeck {
@@ -150,9 +210,9 @@ func getColor(text string) Color {
 }
 func findWinner(board []Field, players []Player) (Player, int) {
 	for i := len(board) - 1; i > -1; i-- {
-		for _, p := range board[i].Pawns {
+		for p := len(board[i].Pawns) - 1; p > -1; p-- {
 			for j, player := range players {
-				if player.Color == p {
+				if player.Color == board[i].Pawns[p] {
 					return player, j + 1
 				}
 			}
@@ -160,7 +220,7 @@ func findWinner(board []Field, players []Player) (Player, int) {
 	}
 	return Player{}, -1
 }
-func shuffleColorsd(colors []Color) []Color {
+func shuffleColors(colors []Color) []Color {
 	rand := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i, _ := range colors {
 		r := i + (rand.Int() % (len(colors) - i))

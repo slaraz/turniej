@@ -13,11 +13,12 @@ type Move struct {
 }
 
 type GameStatus struct {
-	Board       []Field `json:"board"`
-	Cards       []Card  `json:"cards"`
-	Winer       int     `json:"winer"`
-	IsEnd       bool    `json:"isEnd"`
-	TurtleColor Color  `json:"turtleColor"`
+	Board       []Field    `json:"board"`
+	Cards       []Card     `json:"cards"`
+	Winer       int        `json:"winer"`
+	IsEnd       bool       `json:"isEnd"`
+	TurtleColor Color      `json:"turtleColor"`
+	UsedCards   []UsedCard `json:"usedCards"`
 }
 
 // GetGameStatus - return game status for player
@@ -32,6 +33,7 @@ func (game *Game) GetGameStatus(playerNumber int) (*proto.StanGry, error) {
 		TurtleColor: game.players[playerNumber-1].Color,
 		Winer:       game.winer, //IF WINER IS -1 THEN NO WINER
 		IsEnd:       game.isEnd,
+		UsedCards:   game.UsedCards,
 	}
 	log.Printf("-----> GetGameStatus: playerNumber: %d, status: %+v", playerNumber, status)
 	stat := mapGameStatus(&status)
@@ -41,7 +43,7 @@ func (game *Game) GetGameStatus(playerNumber int) (*proto.StanGry, error) {
 
 func mapGameStatus(status *GameStatus) *proto.StanGry {
 	return &proto.StanGry{
-		TwojKolor: mapKolor(status.TurtleColor),
+		TwojKolor:  mapKolor(status.TurtleColor),
 		TwojeKarty: mapCards(status.Cards),
 		Plansza:    mapBoard(status.Board),
 		CzyKoniec:  status.IsEnd,
@@ -106,4 +108,9 @@ func CreateNewGame(numberOfPlayers int) *Game {
 	}
 	game.dealTheCards()
 	return game
+}
+
+func (game *Game) RemovePlayer(playerNumber int) error {
+	playerNumber = playerNumber - 1
+	return game.removePlayerFromGame(playerNumber)
 }

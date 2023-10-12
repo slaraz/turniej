@@ -15,9 +15,9 @@ func CreateGameBoard(uuid string) []Field {
 	return gameBoards[uuid]
 }
 
-func DeleteBoard(uuid string) {
-	delete(gameBoards, uuid)
-}
+//	func DeleteBoard(uuid string) {
+//		delete(gameBoards, uuid)
+//	}
 func MovePawn(board []Field, pawn Color, move int) ([]Field, error) {
 
 	fieldNumber, pawnNumber := findPawn(pawn, board)
@@ -56,5 +56,6 @@ func CheckIfGameOver(board []Field) (bool, Color) {
 	if len(board[len(board)-1].Pawns) == 0 {
 		return false, ""
 	}
-	return true, board[len(board)-1].Pawns[0]
+	numberOfPawns := len(board[len(board)-1].Pawns)
+	return true, board[len(board)-1].Pawns[numberOfPawns-1]
 }

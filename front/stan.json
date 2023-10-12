@@ -1,0 +1,70 @@
+{
+    "nowaGra": {
+        "graID": "OUGIYGBUI",
+        "gracze": [
+            {
+                "numerGracza": "1",
+                "nazwaGracza": "Lewy",
+                "kolorGracza": "RED"
+            },
+            {
+                "numerGracza": "2",
+                "nazwaGracza": "Prawy",
+                "kolorGracza": "BLUE"
+            }
+        ]
+    },
+    "przebiegGry": [
+        {
+            "graID": "PN",
+            "nazwaGracza": "Lewy",
+            "twojKolor": "RED",
+            "twojeKarty": [
+                "R1",
+                "A1",
+                "G2",
+                "Y1B",
+                "L2"
+            ],
+            "plansza": [
+                {
+                    "zolwie": [
+                        "BLUE",
+                        "RED",
+                        "YELLOW"
+                    ]
+                },
+                {
+                    "zolwie": [
+                        "PURPLE"
+                    ]
+                },
+                {
+                    "zolwie": [
+                        "GREEN"
+                    ]
+                },
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {}
+            ],
+            "zagraneKarty": [
+                {
+                    "kolorGracza": "Prawy",
+                    "zagranaKarta": "R1"
+                },
+                {
+                    "kolorGracza": "Lewy",
+                    "zagranaKarta": "Y1"
+                }
+            ]
+        }
+    ],
+    "wynik": {
+        "wygranyGracz": "Lewy"
+    }
+}

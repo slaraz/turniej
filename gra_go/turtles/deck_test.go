@@ -27,12 +27,19 @@ func TestShuffle(t *testing.T) {
 
 func TestDeck_GetCardFromDeck(t *testing.T) {
 	tests := []struct {
-		name    string
-		deck    Deck
-		want    Card
-		wantErr bool
+		name     string
+		deck     Deck
+		want     Card
+		wantDeck Deck
+		wantErr  bool
 	}{
-		// TODO: Add test cases.
+		{
+			name:     "",
+			deck:     []Card{{id: 1}, {id: 2}, {id: 3}},
+			want:     Card{id: 1},
+			wantDeck: []Card{{id: 2}, {id: 3}},
+			wantErr:  false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -43,6 +50,10 @@ func TestDeck_GetCardFromDeck(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Deck.GetCardFromDeck() = %v, want %v", got, tt.want)
+			}
+
+			if !reflect.DeepEqual(tt.deck, tt.wantDeck) {
+				t.Errorf("Deck.GetCardFromDeck() = %v, want %v", tt.deck, tt.wantDeck)
 			}
 		})
 	}
