@@ -51,6 +51,7 @@ func nowyLog(graID string) *logGry {
 		PrzebiegGry:    []logStatus{},
 		WynikGry:       logWynikGry{},
 		mapaKolorGracz: map[proto.KolorZolwia]*gracz{},
+		mapaNumerGracz: map[int]*gracz{},
 	}
 }
 
