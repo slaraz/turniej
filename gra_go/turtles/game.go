@@ -74,7 +74,7 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 		if !checkIdColorValidDoDL(colors, color) {
 			return ErrInvalidColor
 		}
-		col = Colors[0]
+		col = color
 	}
 
 	if col == Default {
