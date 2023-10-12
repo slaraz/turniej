@@ -85,14 +85,6 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 		return err
 	}
 	game.board = b
-
-	endGame, _ := CheckIfGameOver(game.board)
-	if endGame {
-		game.isEnd = true
-		_, pi := findWinner(game.board, game.players)
-		game.winer = pi
-		return nil
-	}
 	player.Cards = removeCard(player.Cards, c)
 	newCard, err := game.deck.GetCardFromDeck()
 	if err != nil {
@@ -100,6 +92,14 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 	}
 	game.usedDeck = append(game.usedDeck, c)
 	game.UsedCards = append(game.UsedCards, UsedCard{CardSymbol: string(c.Symbol), Player: playerNumber + 1})
+	endGame, _ := CheckIfGameOver(game.board)
+	if endGame {
+		game.isEnd = true
+		_, pi := findWinner(game.board, game.players)
+		game.winer = pi
+		return nil
+	}
+
 	if len(game.deck) == 0 {
 		game.deck = game.usedDeck
 		game.usedDeck = Deck{}
