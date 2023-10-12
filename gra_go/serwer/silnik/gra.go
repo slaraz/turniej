@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"sync"
 	"time"
 
@@ -274,10 +275,24 @@ func (g *gra) przebiegRozgrywki() {
 func (g *gra) koniec(err error) {
 	log.Printf("%s KONIEC rozgrywki: %v\n", g.graID, err)
 	fmt.Println(g.logGry.getJSON())
+	saveFile(g.logGry.getJSON())
 	g.kanArenaKoniecGry <- reqKoniecGry{
 		graID: g.graID,
 		err:   err,
 	}
+}
+
+func saveFile(json string) {
+	f, err := os.OpenFile("logForWebu.log",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+	defer f.Close()
+	if _, err := f.WriteString(json); err != nil {
+		log.Println(err)
+	}
+
 }
 
 func (g *gra) nastepny(i int) int {
