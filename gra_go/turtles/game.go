@@ -99,7 +99,7 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 		return err
 	}
 	game.usedDeck = append(game.usedDeck, c)
-	game.UsedCards = append(game.UsedCards, UsedCard{CardSymbol: string(c.Symbol), Player: playerNumber})
+	game.UsedCards = append(game.UsedCards, UsedCard{CardSymbol: string(c.Symbol), Player: playerNumber + 1})
 	if len(game.deck) == 0 {
 		game.deck = game.usedDeck
 		game.usedDeck = Deck{}
