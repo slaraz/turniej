@@ -65,15 +65,16 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 	if err := game.checkIfCardAndColorIsValid(c, color, playerNumber); err != nil {
 		return err
 	}
+	col := c.color
 	if c.typ == LastOne && c.color == Default && color == Default {
 		colors := findLastOnePawns(game.board)
 		if len(colors) != 1 {
 			return ErrPickTheColor
 		}
-		c.color = Colors[0]
+		col = colors[0]
 	}
-	col := c.color
-	if c.color == Default {
+
+	if col == Default {
 		col = color
 	}
 	b, err := MovePawn(game.board, col, c.move)
