@@ -23,7 +23,7 @@ type serwer struct {
 }
 
 func (s *serwer) NowyMecz(ctx context.Context, conf *proto.KonfiguracjaGry) (*proto.NowaGraInfo, error) {
-	graID, err := s.arena.NowaGra(int(conf.LiczbaGraczy))
+	graID, err := s.arena.NowaGra(int(conf.LiczbaGraczy), conf.GraID)
 	if err != nil {
 		return nil, status.Error(codes.ResourceExhausted, err.Error())
 	}

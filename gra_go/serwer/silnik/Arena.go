@@ -26,6 +26,7 @@ func NowaArena() *Arena {
 
 type reqNewGra struct {
 	iluGraczy int
+	graID     string
 	kanOdp    chan odpNowaGra
 }
 
@@ -34,10 +35,11 @@ type odpNowaGra struct {
 	err   error
 }
 
-func (arena *Arena) NowaGra(iluGraczy int) (string, error) {
+func (arena *Arena) NowaGra(iluGraczy int, graID string) (string, error) {
 	kanOdp := make(chan odpNowaGra)
 	arena.kanNewGra <- reqNewGra{
 		iluGraczy: iluGraczy,
+		graID:     graID,
 		kanOdp:    kanOdp,
 	}
 	odp := <-kanOdp
@@ -75,17 +77,31 @@ func (arena *Arena) arenaFlow() {
 
 		case req := <-arena.kanNewGra:
 			odp := odpNowaGra{}
-			//TODO: zrobić ograniczenie liczby gier per serwer
 			// generuję unikalny ID gry
-			graID := arena.getNowaGraID()
-			// uruchamiam nową grę
-			gra, err := nowaGra(graID, req.iluGraczy, arena.kanKoniecGry)
-			if err != nil {
-				odp.err = err
+			var graID string
+			if req.graID == "" {
+				// nie podano graID, losujemy nowy
+				graID = arena.getNowaGraID()
 			} else {
-				// dokładam nową grę do aktywnych na arenie
-				arena.aktywneGry[graID] = gra
-				odp.graID = graID
+				// podano graID
+				if _, ok := arena.aktywneGry[req.graID]; ok {
+					// ale takie już jest
+					odp.err = fmt.Errorf("gra %q już istnieje", req.graID)
+				}
+				graID = req.graID
+			}
+			// jeśli z graID ok
+			if odp.err == nil {
+
+				// uruchamiam nową grę
+				gra, err := nowaGra(graID, req.iluGraczy, arena.kanKoniecGry)
+				if err != nil {
+					odp.err = err
+				} else {
+					// dokładam nową grę do aktywnych na arenie
+					arena.aktywneGry[graID] = gra
+					odp.graID = graID
+				}
 			}
 			req.kanOdp <- odp
 

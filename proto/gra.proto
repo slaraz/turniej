@@ -15,6 +15,7 @@ service Gra {
 
 message KonfiguracjaGry {
     int32 liczbaGraczy = 1;
+    string graID = 2;
 }
 
 message NowaGraInfo {

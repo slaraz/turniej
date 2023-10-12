@@ -49,7 +49,10 @@ func main() {
 	if *nowa {
 		ctx, cancel := context.WithTimeout(context.Background(), NOWY_MECZ_TIMEOUT)
 		defer cancel()
-		nowaGraInfo, err := c.NowyMecz(ctx, &proto.KonfiguracjaGry{LiczbaGraczy: int32(*lg)})
+		nowaGraInfo, err := c.NowyMecz(ctx, &proto.KonfiguracjaGry{
+			LiczbaGraczy: int32(*lg),
+			GraID:        *graID,
+		})
 		if err != nil {
 			log.Fatalf("c.NowyMecz: %v", err)
 		}
