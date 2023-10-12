@@ -21,16 +21,38 @@ func (dzg *DaneZGry) PobierzDaneZeStanuGry(sg *proto.StanGry) {
 	dzg.KrokowDoKonca = len(sg.Plansza) - dzg.NaszePole
 
 	dzg.OstatnieZolwie = znajdzOstatnieZolwie(sg.Plansza)
-	sg.GetTwojKolor()
+	dzg.ZolwiePodNami = znajdzZolwiePodNami(dzg.NaszePole, sg.TwojKolor, sg.Plansza)
+	dzg.ZolwieNadNami = znajdzZolwieNadNami(dzg.NaszePole, sg.TwojKolor, sg.Plansza)
 	dzg.KartyCofajace = getKartyCofajace(sg.TwojeKarty)
-
-	kartyCofajaceInt := []int{}
-	for _, k := range dzg.KartyCofajace {
-		kartyCofajaceInt = append(kartyCofajaceInt, int(k))
-	}
 }
 
-func znajdzOstatnieZolwie(pole []*proto.Pole) []proto.KolorZolwia {
+func znajdzZolwieNadNami(naszePole int, naszKolor proto.KolorZolwia, plansza []*proto.Pole) []proto.KolorZolwia {
+	indeksNaszegoZolwia := 0
+
+	for i, kolorZolwia := range plansza[naszePole].GetZolwie() {
+		if kolorZolwia == naszKolor {
+			indeksNaszegoZolwia = i
+			break
+		}
+	}
+
+	return plansza[naszePole].GetZolwie()[indeksNaszegoZolwia+1:]
+}
+
+func znajdzZolwiePodNami(naszePole int, naszKolor proto.KolorZolwia, plansza []*proto.Pole) []proto.KolorZolwia {
+	indeksNaszegoZolwia := 0
+
+	for i, kolorZolwia := range plansza[naszePole].GetZolwie() {
+		if kolorZolwia == naszKolor {
+			indeksNaszegoZolwia = i
+			break
+		}
+	}
+
+	return plansza[naszePole].GetZolwie()[:indeksNaszegoZolwia]
+}
+
+func znajdzOstatnieZolwie(plansza []*proto.Pole) []proto.KolorZolwia {
 	ostatnieZolwie := []proto.KolorZolwia{
 		proto.KolorZolwia_XXX,
 		proto.KolorZolwia_RED,
@@ -40,8 +62,8 @@ func znajdzOstatnieZolwie(pole []*proto.Pole) []proto.KolorZolwia {
 		proto.KolorZolwia_PURPLE,
 	}
 
-	for _, p := range pole {
-		if p != nil {
+	for _, p := range plansza {
+		if len(p.GetZolwie()) != 0 {
 			ostatnieZolwie = p.Zolwie
 			break
 		}
@@ -50,8 +72,8 @@ func znajdzOstatnieZolwie(pole []*proto.Pole) []proto.KolorZolwia {
 	return ostatnieZolwie
 }
 
-func naszePole(naszKolor proto.KolorZolwia, pole []*proto.Pole) int {
-	for i, p := range pole {
+func naszePole(naszKolor proto.KolorZolwia, plansza []*proto.Pole) int {
+	for i, p := range plansza {
 		for _, z := range p.GetZolwie() {
 			if z == naszKolor {
 				return i
@@ -59,7 +81,7 @@ func naszePole(naszKolor proto.KolorZolwia, pole []*proto.Pole) int {
 		}
 	}
 
-	return 0
+	return -1
 }
 
 func getKartyCofajace(twojeKarty []proto.Karta) []proto.Karta {
