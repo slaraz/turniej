@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	NUMBER_OF_FIELDS_ON_THE_BOARD = 5
+	NUMBER_OF_FIELDS_ON_THE_BOARD = 2
 	MAX_CARD_FOR_PLAYER           = 5
 )
 
@@ -59,13 +59,10 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 	if err := game.checkIfCardAndColorIsValid(c, color, playerNumber); err != nil {
 		return err
 	}
-	if c.typ == LastOne && c.color == Default {
+	if c.typ == LastOne && c.color == Default && color == Default {
 		colors := findLastOnePawns(game.board)
-		if len(colors) != 1 && color == Default {
+		if len(colors) != 1 {
 			return ErrPickTheColor
-		}
-		if !checkIdColorValidDoDL(colors, color) {
-			return ErrInvalidColor
 		}
 		c.color = Colors[0]
 	}
@@ -134,8 +131,8 @@ func checkIfCorrectPlayerNumber(players []Player, playerNumber int) bool {
 	}
 	return true
 }
-func findLastOnePawns(fields []Field) []Color {
-	for _, f := range fields {
+func findLastOnePawns([]Field) []Color {
+	for _, f := range []Field{} {
 		if len(f.Pawns) > 0 {
 			return f.Pawns
 		}
@@ -159,7 +156,24 @@ func (game *Game) checkIfCardAndColorIsValid(card Card, color Color, playerNumbe
 		}
 		return ErrInvalidCard
 	}
+	co := card.color
+	if card.color == Default {
+		co = color
+	}
+	if !checkIfTurtleIsOnTheBoard(game.board, co) && card.move < 0 {
+		return ErrInvalidCard
+	}
 	return nil
+}
+func checkIfTurtleIsOnTheBoard(board []Field, color Color) bool {
+	for _, f := range board {
+		for _, c := range f.Pawns {
+			if c == color {
+				return true
+			}
+		}
+	}
+	return false
 }
 func findCard(symbol Symbol) (Card, error) {
 	for _, card := range DefaultDeck {
@@ -188,9 +202,9 @@ func getColor(text string) Color {
 }
 func findWinner(board []Field, players []Player) (Player, int) {
 	for i := len(board) - 1; i > -1; i-- {
-		for _, p := range board[i].Pawns {
+		for p := len(board[i].Pawns) - 1; p > -1; p-- {
 			for j, player := range players {
-				if player.Color == p {
+				if player.Color == board[i].Pawns[p] {
 					return player, j + 1
 				}
 			}
@@ -198,7 +212,7 @@ func findWinner(board []Field, players []Player) (Player, int) {
 	}
 	return Player{}, -1
 }
-func shuffleColorsd(colors []Color) []Color {
+func shuffleColors(colors []Color) []Color {
 	rand := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i, _ := range colors {
 		r := i + (rand.Int() % (len(colors) - i))
@@ -207,13 +221,4 @@ func shuffleColorsd(colors []Color) []Color {
 		colors[r] = c
 	}
 	return colors
-}
-
-func checkIdColorValidDoDL(colors []Color, color Color) bool {
-	for _, c := range colors {
-		if c == color {
-			return true
-		}
-	}
-	return false
 }
