@@ -11,7 +11,7 @@ type UsedCard struct {
 }
 
 const (
-	NUMBER_OF_FIELDS_ON_THE_BOARD = 10
+	NUMBER_OF_FIELDS_ON_THE_BOARD = 2
 	MAX_CARD_FOR_PLAYER           = 5
 )
 

@@ -1,6 +1,10 @@
 package silnik
 
-import "github.com/slaraz/turniej/gra_go/proto"
+import (
+	"encoding/json"
+
+	"github.com/slaraz/turniej/gra_go/proto"
+)
 
 type logGry struct {
 	NowaGra        logNowaGra
@@ -114,4 +118,9 @@ func logZagraneKarty() []logZagranaKarta {
 
 func (l *logGry) dodajKoniec(stan *proto.StanGry) {
 	l.WynikGry.WygranyGracz = l.mapaNumerGracz[int(stan.KtoWygral)].nazwaGracza
+}
+
+func (l *logGry) getJSON() string {
+	j, _ := json.MarshalIndent(l, "", "  ")
+	return string(j)
 }

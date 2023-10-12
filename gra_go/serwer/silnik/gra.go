@@ -235,8 +235,10 @@ func (g *gra) przebiegRozgrywki() {
 				}(i, gr)
 			}
 			wg.Wait()
-			g.koniec(nil)
+
+			// TU SIĘ KOŃCZY POPRAWNA PARTIA
 			g.logGry.dodajKoniec(stan)
+			g.koniec(nil)
 			return
 		}
 		log.Printf("%s Rozgrywka4: ruszający gracz %d %q\n", g.graID, i, ruszajacyGracz.nazwaGracza)
@@ -271,6 +273,7 @@ func (g *gra) przebiegRozgrywki() {
 
 func (g *gra) koniec(err error) {
 	log.Printf("%s KONIEC rozgrywki: %v\n", g.graID, err)
+	fmt.Println(g.logGry.getJSON())
 	g.kanArenaKoniecGry <- reqKoniecGry{
 		graID: g.graID,
 		err:   err,

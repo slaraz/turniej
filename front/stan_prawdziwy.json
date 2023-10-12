@@ -1,0 +1,136 @@
+{
+    "NowaGra": {
+        "GraID": "DT",
+        "Gracze": [
+            {
+                "NumerGracza": 1,
+                "NazwaGracza": "Lewy",
+                "KolorGracza": "YELLOW"
+            },
+            {
+                "NumerGracza": 2,
+                "NazwaGracza": "Prawy",
+                "KolorGracza": "GREEN"
+            }
+        ]
+    },
+    "PrzebiegGry": [
+        {
+            "NazwaGracza": "Lewy",
+            "TwojKolor": "YELLOW",
+            "TwojeKarty": [
+                "P1B",
+                "A1",
+                "B1",
+                "P1",
+                "G1"
+            ],
+            "Plansza": [
+                {
+                    "Zolwie": []
+                },
+                {
+                    "Zolwie": []
+                }
+            ],
+            "ZagraneKatry": []
+        },
+        {
+            "NazwaGracza": "Prawy",
+            "TwojKolor": "GREEN",
+            "TwojeKarty": [
+                "L1",
+                "L2",
+                "Y1",
+                "Y1",
+                "A1"
+            ],
+            "Plansza": [
+                {
+                    "Zolwie": [
+                        "BLUE"
+                    ]
+                },
+                {
+                    "Zolwie": []
+                }
+            ],
+            "ZagraneKatry": []
+        },
+        {
+            "NazwaGracza": "Lewy",
+            "TwojKolor": "YELLOW",
+            "TwojeKarty": [
+                "P1B",
+                "A1",
+                "P1",
+                "G1",
+                "A1B"
+            ],
+            "Plansza": [
+                {
+                    "Zolwie": [
+                        "BLUE",
+                        "YELLOW"
+                    ]
+                },
+                {
+                    "Zolwie": []
+                }
+            ],
+            "ZagraneKatry": []
+        },
+        {
+            "NazwaGracza": "Prawy",
+            "TwojKolor": "GREEN",
+            "TwojeKarty": [
+                "L1",
+                "L2",
+                "Y1",
+                "A1",
+                "B1"
+            ],
+            "Plansza": [
+                {
+                    "Zolwie": [
+                        "BLUE",
+                        "YELLOW",
+                        "GREEN"
+                    ]
+                },
+                {
+                    "Zolwie": []
+                }
+            ],
+            "ZagraneKatry": []
+        },
+        {
+            "NazwaGracza": "Lewy",
+            "TwojKolor": "YELLOW",
+            "TwojeKarty": [
+                "P1B",
+                "A1",
+                "P1",
+                "A1B",
+                "P1"
+            ],
+            "Plansza": [
+                {
+                    "Zolwie": [
+                        "BLUE",
+                        "YELLOW"
+                    ]
+                },
+                {
+                    "Zolwie": [
+                        "GREEN"
+                    ]
+                }
+            ],
+            "ZagraneKatry": []
+        }
+    ],
+    "WynikGry": {
+        "WygranyGracz": "Prawy"
+    }
+}
