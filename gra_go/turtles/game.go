@@ -151,7 +151,7 @@ func (game *Game) findLastOnePawns(fields []Field) []Color {
 	if players == len(Colors) {
 		for _, f := range fields {
 			if len(f.Pawns) > 0 {
-				return []Color{f.Pawns[0]}
+				return f.Pawns
 			}
 		}
 	}
