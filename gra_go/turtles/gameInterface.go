@@ -13,12 +13,12 @@ type Move struct {
 }
 
 type GameStatus struct {
-	Board       []Field     `json:"board"`
-	Cards       []Card      `json:"cards"`
-	Winer       int         `json:"winer"`
-	IsEnd       bool        `json:"isEnd"`
-	TurtleColor Color       `json:"turtleColor"`
-	UsedCards   []UsedCards `json:"usedCards"`
+	Board       []Field    `json:"board"`
+	Cards       []Card     `json:"cards"`
+	Winer       int        `json:"winer"`
+	IsEnd       bool       `json:"isEnd"`
+	TurtleColor Color      `json:"turtleColor"`
+	UsedCards   []UsedCard `json:"usedCards"`
 }
 
 // GetGameStatus - return game status for player
