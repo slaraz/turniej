@@ -67,7 +67,7 @@ func (game *Game) playCard(c Card, color Color, playerNumber int) (err error) {
 	}
 	col := c.color
 	if c.typ == LastOne && c.color == Default {
-		colors := findLastOnePawns(game.board)
+		colors := game.findLastOnePawns(game.board)
 		if len(colors) != 1 && color == Default {
 			return ErrPickTheColor
 		}
@@ -143,13 +143,31 @@ func checkIfCorrectPlayerNumber(players []Player, playerNumber int) bool {
 	}
 	return true
 }
-func findLastOnePawns(fields []Field) []Color {
+func (game *Game) findLastOnePawns(fields []Field) []Color {
+	players := 0
 	for _, f := range fields {
-		if len(f.Pawns) > 0 {
-			return f.Pawns
+		players += len(f.Pawns)
+	}
+	if players == len(Colors) {
+		for _, f := range fields {
+			if len(f.Pawns) > 0 {
+				return []Color{f.Pawns[0]}
+			}
 		}
 	}
-	return Colors
+	result := []Color{}
+outer:
+	for _, color := range Colors {
+		for _, f := range fields {
+			for _, c := range f.Pawns {
+				if c == color {
+					continue outer
+				}
+			}
+		}
+		result = append(result, color)
+	}
+	return result
 }
 func (game *Game) checkIfCardAndColorIsValid(card Card, color Color, playerNumber int) error {
 	player := game.players[playerNumber]
@@ -159,7 +177,7 @@ func (game *Game) checkIfCardAndColorIsValid(card Card, color Color, playerNumbe
 	if card.typ == Normal && card.color == Default && color == Default {
 		return ErrInvalidCard
 	}
-	colors := findLastOnePawns(game.board)
+	colors := game.findLastOnePawns(game.board)
 	if card.typ == LastOne && card.color != Default {
 		for _, c := range colors {
 			if c == card.color {
