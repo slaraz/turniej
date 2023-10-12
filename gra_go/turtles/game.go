@@ -31,7 +31,7 @@ func (game *Game) GetPlayerTurn() int {
 
 func generatePlayers(numberOfPlayers int) []Player {
 	players := make([]Player, numberOfPlayers)
-	colors := shuffleColorsd(Colors)
+	colors := shuffleColors(Colors)
 	for i := 0; i < numberOfPlayers; i++ {
 		players[i] = Player{Color: colors[i]}
 	}
