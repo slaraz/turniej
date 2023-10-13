@@ -1,7 +1,6 @@
 package turtles
 
 import (
-	"log"
 	"strings"
 
 	"github.com/slaraz/turniej/gra_go/proto"
@@ -35,9 +34,9 @@ func (game *Game) GetGameStatus(playerNumber int) (*proto.StanGry, error) {
 		IsEnd:       game.isEnd,
 		UsedCards:   game.UsedCards,
 	}
-	log.Printf("-----> GetGameStatus: playerNumber: %d, status: %+v", playerNumber, status)
+	//log.Printf("-----> GetGameStatus: playerNumber: %d, status: %+v", playerNumber, status)
 	stat := mapGameStatus(&status)
-	log.Printf("-----> StanGry: %+v", stat)
+	//log.Printf("-----> StanGry: %+v", stat)
 	return stat, nil
 }
 
