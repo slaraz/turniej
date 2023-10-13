@@ -79,6 +79,58 @@ func main() {
 	log.Println("Start")
 	defer log.Println("Koniec.")
 
+	//const ELASTIC = "tylko na konsole"
+	//const ELASTIC = "url=http://test:testtest@192.168.88.100:9200; indeks=hackaton"
+	// logowanie do Elastica
+
+	// const INDEX = "hackaton"
+	// cfg := elasticsearch.Config{
+	// 	// CloudID: "RainbowTest:ZXVyb3BlLXdlc3QxLmdjcC5jbG91ZC5lcy5pbzo0NDMkOThiNzkzZDYwNTdmNDJmOWJjN2IzNTBhZTljYmUxZDUkYmExMDY0ZTY1NGEyNGIxMDk4OGM2ZDViOTI2ZjljODU=",
+	// 	// APIKey: "OFRITUo0c0JIOXB0Q3ZOVFJ2THY6T3dmZFk1cmpReUNSWjE0a3hnTDZfUQ==",
+	// 	//Addresses: []string{"http://test:testtest@192.168.88.100:9200"},
+	// 	Addresses: []string{"http://elastic:C*ErPJfjivukMIC49JfR@localhost:9200"},
+	// }
+	// es, err := elasticsearch.NewClient(cfg)
+	// if err != nil {
+	// 	log.Fatalf("[Elastic] błąd elasticsearch.NewClient(): %q", err)
+	// }
+
+	// es.Indices.Create(INDEX)
+
+	// document := struct {
+	// 	Name string `json:"name"`
+	// }{
+	// 	"go-elasticsearch",
+	// }
+	// data, _ := json.Marshal(document)
+	// res, err := es.Index(INDEX, bytes.NewReader(data))
+
+	// res, err := es.Index(
+	// 	INDEX,
+	// 	strings.NewReader(`{"title" : "Loguje się do Elastica"}`),
+	// )
+	// if err != nil {
+	// 	log.Printf("[Elastic] błąd es.klient.Index(): %v", err)
+	// 	return
+	// }
+	// defer res.Body.Close()
+	// if res.StatusCode != http.StatusCreated {
+	// 	body, err := io.ReadAll(res.Body)
+	// 	if err != nil {
+	// 		log.Printf("[Elastic] res.StatusCode: %d, ioutil.ReadAll(res.Body): %v", res.StatusCode, err)
+	// 	}
+	// 	log.Printf("[Elastic] res.StatusCode: %d, resp: %v", res.StatusCode, string(body))
+	// }
+
+	//kl.Indeks("hackaton")
+	//kl.Loguj(map[string]interface{}{
+	// logg := maplogger.NowyLogger(ELASTIC)
+	// defer logg.Close()
+	// // logowanie Elastic
+	// mlog := logg.NowyWpis()
+	// mlog["hello"] = "world"
+	// logg.Loguj(mlog)
+
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", IP_PORT))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
