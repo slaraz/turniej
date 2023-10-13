@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"os"
 	"sync"
 	"time"
 
@@ -59,7 +58,7 @@ func nowaGra(graID string, liczbaGraczy int, kanKoniecGry chan reqKoniecGry) (*g
 		kanArenaKoniecGry: kanKoniecGry,
 		logGry:            nowyLog(graID),
 	}
-	//log.Printf("%s nowaGra(): utworzono grę dla %d graczy\n", g.graID, g.liczbaGraczy)
+	log.Printf("%s nowaGra(): utworzono grę dla %d graczy\n", g.graID, g.liczbaGraczy)
 	// uruchomienie wątku gry
 	go g.przebiegRozgrywki()
 	return g, nil
@@ -108,6 +107,7 @@ func (g *gra) WykonajRuch(graczID string, ruch *proto.RuchGracza) (string, error
 	odp := <-kanOdp
 	if odp.err != nil {
 		log.Printf("%s WykonajRuch(): %s wykonał błędny ruch %q: %v\n", g.graID, gracz.nazwaGracza, ruch.ZagranaKarta, odp.err)
+		time.Sleep(time.Millisecond * 10)
 	} else {
 		//log.Printf("%s WykonajRuch(): %s wykonanał ruch %q\n", g.graID, gracz.nazwaGracza, ruch.ZagranaKarta)
 	}
@@ -272,30 +272,18 @@ func (g *gra) przebiegRozgrywki() {
 	} //for
 }
 
-func (g *gra) koniec(err error) {
-	log.Printf("%s KONIEC rozgrywki: %v\n", g.graID, err)
-	log.Printf("%s WynikGry.WygranyGracz: %q", g.graID, g.logGry.WynikGry.WygranyGracz)
-	//fmt.Println(g.logGry.getJSON())
-	//fmt.Println(g.logGry.getJSON())
-	//saveFile(g.logGry.getJSON())
-	g.kanArenaKoniecGry <- reqKoniecGry{
-		graID: g.graID,
-		err:   err,
-	}
-}
+// func saveFile(json string) {
+// 	f, err := os.OpenFile("logForWebu.log",
+// 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// 	defer f.Close()
+// 	if _, err := f.WriteString(json); err != nil {
+// 		log.Println(err)
+// 	}
 
-func saveFile(json string) {
-	f, err := os.OpenFile("logForWebu.log",
-		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Println(err)
-	}
-	defer f.Close()
-	if _, err := f.WriteString(json); err != nil {
-		log.Println(err)
-	}
-
-}
+// }
 
 func (g *gra) nastepny(i int) int {
 	nast := i + 1
@@ -303,5 +291,21 @@ func (g *gra) nastepny(i int) int {
 		return 0
 	} else {
 		return nast
+	}
+}
+
+func (g *gra) koniec(err error) {
+	log.Printf("%s KONIEC rozgrywki: %v\n", g.graID, err)
+	log.Printf("%s WynikGry.WygranyGracz: %q", g.graID, g.logGry.WynikGry.WygranyGracz)
+	//fmt.Println(g.logGry.getJSON())
+	//fmt.Println(g.logGry.getJSON())
+	//saveFile(g.logGry.getJSON())
+
+	//b, _ := json.Marshal(g.getDokument())
+	//g.es.Index("INDEKS", bytes.NewReader(b))
+
+	g.kanArenaKoniecGry <- reqKoniecGry{
+		graID: g.graID,
+		err:   err,
 	}
 }
