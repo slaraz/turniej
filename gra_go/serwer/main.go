@@ -1,17 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"log"
 	"net"
-	"net/http"
 
-	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/slaraz/turniej/gra_go/proto"
 	"github.com/slaraz/turniej/gra_go/serwer/silnik"
 	"google.golang.org/grpc"
@@ -84,59 +78,6 @@ func (s *serwer) MojRuch(ctx context.Context, ruch *proto.RuchGracza) (*proto.St
 func main() {
 	log.Println("Start")
 	defer log.Println("Koniec.")
-
-	//const ELASTIC = "tylko na konsole"
-	//const ELASTIC = "url=http://test:testtest@192.168.88.100:9200; indeks=hackaton"
-	// logowanie do Elastica
-
-	cert, _ := ioutil.ReadFile("/home/rtuser/ca.crt")
-	const INDEX = "hackaton"
-	cfg := elasticsearch.Config{
-		Addresses: []string{"https://test:testtest@localhost:9200"},
-		CACert:    cert,
-		Username:  "test",
-		Password:  "testtest",
-	}
-	es, err := elasticsearch.NewClient(cfg)
-	if err != nil {
-		log.Fatalf("[Elastic] błąd elasticsearch.NewClient(): %q", err)
-	}
-
-	es.Indices.Create(INDEX)
-
-	document := struct {
-		Name string `json:"name"`
-	}{
-		"go-elasticsearch",
-	}
-	data, _ := json.Marshal(document)
-	res, err := es.Index(INDEX, bytes.NewReader(data))
-
-	// res, err := es.Index(
-	// 	INDEX,
-	// 	strings.NewReader(`{"title" : "Loguje się do Elastica"}`),
-	// )
-	if err != nil {
-		log.Printf("[Elastic] błąd es.klient.Index(): %v", err)
-		return
-	}
-	defer res.Body.Close()
-	if res.StatusCode != http.StatusCreated {
-		body, err := io.ReadAll(res.Body)
-		if err != nil {
-			log.Printf("[Elastic] res.StatusCode: %d, ioutil.ReadAll(res.Body): %v", res.StatusCode, err)
-		}
-		log.Printf("[Elastic] res.StatusCode: %d, resp: %v", res.StatusCode, string(body))
-	}
-
-	//kl.Indeks("hackaton")
-	//kl.Loguj(map[string]interface{}{
-	// logg := maplogger.NowyLogger(ELASTIC)
-	// defer logg.Close()
-	// // logowanie Elastic
-	// mlog := logg.NowyWpis()
-	// mlog["hello"] = "world"
-	// logg.Loguj(mlog)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", IP_PORT))
 	if err != nil {

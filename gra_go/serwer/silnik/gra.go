@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"sync"
 	"time"
 
@@ -272,18 +273,17 @@ func (g *gra) przebiegRozgrywki() {
 	} //for
 }
 
-// func saveFile(json string) {
-// 	f, err := os.OpenFile("logForWebu.log",
-// 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-// 	defer f.Close()
-// 	if _, err := f.WriteString(json); err != nil {
-// 		log.Println(err)
-// 	}
-
-// }
+func saveFile(json string, nazwapliku string) {
+	f, err := os.OpenFile(nazwapliku,
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+	defer f.Close()
+	if _, err := f.WriteString(json); err != nil {
+		log.Println(err)
+	}
+}
 
 func (g *gra) nastepny(i int) int {
 	nast := i + 1
@@ -298,11 +298,13 @@ func (g *gra) koniec(err error) {
 	log.Printf("%s KONIEC rozgrywki: %v\n", g.graID, err)
 	log.Printf("%s WynikGry.WygranyGracz: %q", g.graID, g.logGry.WynikGry.WygranyGracz)
 	//fmt.Println(g.logGry.getJSON())
-	//fmt.Println(g.logGry.getJSON())
-	//saveFile(g.logGry.getJSON())
+	//fmt.Println(g.logGry.getJSON())\
+	nazwapliku := g.graID
+	for _, g := range g.graczeByID {
+		nazwapliku += "_" + g.nazwaGracza
+	}
 
-	//b, _ := json.Marshal(g.getDokument())
-	//g.es.Index("INDEKS", bytes.NewReader(b))
+	saveFile(g.logGry.getJSON(), nazwapliku)
 
 	g.kanArenaKoniecGry <- reqKoniecGry{
 		graID: g.graID,
