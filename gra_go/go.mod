@@ -3,11 +3,13 @@ module github.com/slaraz/turniej/gra_go
 go 1.21.1
 
 require (
+	github.com/elastic/go-elasticsearch/v8 v8.10.1
 	google.golang.org/grpc v1.58.2
 	google.golang.org/protobuf v1.31.0
 )
 
 require (
+	github.com/elastic/elastic-transport-go/v8 v8.3.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
