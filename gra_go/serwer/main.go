@@ -92,7 +92,7 @@ func main() {
 	cert, _ := ioutil.ReadFile("/home/rtuser/ca.crt")
 	const INDEX = "hackaton"
 	cfg := elasticsearch.Config{
-		Addresses: []string{"https://test:testtest@192.168.88.100:9200"},
+		Addresses: []string{"https://test:testtest@localhost:9200"},
 		CACert:    cert,
 		Username:  "test",
 		Password:  "testtest",
